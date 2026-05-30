@@ -34,7 +34,7 @@ class Assistant:
                 "answer": (
                     f"No recorte de {summary['ano_eleicao']}, turno {summary['turno']}, com renda de "
                     f"{summary['ano_referencia_renda']} e {summary['municipios_validos']} municípios analisados, "
-                    "a cobertura local ainda é reduzida para destacar uma conclusão estatística sobre a relação entre renda e ausência eleitoral. "
+                    "os dados permitem observar padrões territoriais entre renda e ausência eleitoral. "
                     f"{self.prompt('methodology')}"
                 ),
             }
@@ -50,7 +50,7 @@ class Assistant:
                 "data": ranking,
                 "answer": f"Lista ordenada por {metric}, eleição 2022, turno 1, renda 2022:\n" + "\n".join(lines),
             }
-        municipalities = self.repository.list_municipalities({"page_size": 100})["items"]
+        municipalities = self.repository.list_municipalities({"page_size": self.repository.config["api"]["max_page_size"]})["items"]
         for item in municipalities:
             if normalize_name(item["municipio"]) in normalized:
                 detail = self.repository.municipality(item["cod_ibge_municipio"], {})

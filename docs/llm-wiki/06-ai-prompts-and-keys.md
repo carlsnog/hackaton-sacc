@@ -42,7 +42,7 @@ Os JSONs RAG já são produzidos, mas ainda não são recuperados pelo assistent
 3. Preservar o roteamento atual para executar SQL antes da chamada ao modelo.
 4. Selecionar os JSONs em `data/rag/<snapshot_id>/` somente para os municípios citados ou retornados pela tool.
 5. Enviar à LLM: prompts editáveis, pergunta original, resultado estruturado da tool e documentos RAG selecionados.
-6. Exigir que a resposta mencione recorte temporal, cobertura parcial e fontes; nunca permitir que o modelo invente cálculos.
+6. Exigir que a resposta mencione recorte temporal, cobertura e fontes; nunca permitir que o modelo invente cálculos.
 7. Testar fallback: se a LLM estiver indisponível, retornar o template determinístico atual.
 
 Fluxo desejado:

@@ -11,6 +11,7 @@
     <p class="eyebrow">Participação eleitoral na Paraíba</p>
     <h1>Vozes Ausentes PB</h1>
     <p>Explore a abstenção eleitoral nos municípios paraibanos e compare os indicadores com o contexto socioeconômico disponível.</p>
+    <p class="source-note">Fontes locais: TSE para os dados eleitorais de 2022 e IBGE para os indicadores municipais. Os indicadores censitários de renda usam referência de 2022.</p>
   </header>
   <main>
     <section id="notice" class="notice"></section>
@@ -19,7 +20,7 @@
       <div>
         <p class="eyebrow">Visão territorial</p>
         <h2>Mapa de calor da abstenção</h2>
-        <p>Quanto mais intensa a cor, maior foi a porcentagem de eleitores ausentes no município.</p>
+        <p>Quanto mais intensa a cor, maior foi a porcentagem de eleitores ausentes. Municípios em cinza ainda não possuem dados socioeconômicos cruzados neste recorte.</p>
       </div>
       <div id="map-container" class="map-container">
         <svg id="heat-map" viewBox="0 0 720 460" role="img" aria-label="Mapa de calor municipal da taxa de abstenção na Paraíba"></svg>
@@ -38,6 +39,14 @@
       <svg id="scatter" viewBox="0 0 720 360" role="img" aria-label="Gráfico de dispersão de renda mediana por taxa de abstenção"></svg>
     </section>
     <section class="panel">
+      <div>
+        <p class="eyebrow">Magnitude eleitoral</p>
+        <h2>PIB municipal e percentual de abstenção (escala log)</h2>
+        <p>Cada ponto representa um município. O eixo horizontal usa escala logarítmica para distribuir melhor cidades com diferentes magnitudes econômicas. O PIB municipal é exibido em milhares de reais.</p>
+      </div>
+      <svg id="electoral-scatter" viewBox="0 0 720 360" role="img" aria-label="Gráfico de dispersão de PIB municipal por percentual de abstenção"></svg>
+    </section>
+    <section class="panel">
       <div class="toolbar">
         <div>
           <p class="eyebrow">Consulta por município</p>
@@ -45,24 +54,13 @@
         </div>
         <a href="/api/v1/export.csv">Exportar CSV</a>
       </div>
-      <p>Selecione um cabeçalho para ordenar a tabela. O índice de atenção combina abstenção elevada e indicadores de menor renda para apoiar a investigação de contextos locais.</p>
-      <table>
-        <thead><tr><th><button class="sort" data-sort="municipio">Município</button></th><th><button class="sort" data-sort="taxa_abstencao_pct">Eleitores ausentes</button></th><th><button class="sort" data-sort="renda_pc_mediana">Renda mediana por pessoa</button></th><th><button class="sort" data-sort="score_vulnerabilidade">Índice de atenção</button></th></tr></thead>
-        <tbody id="ranking"></tbody>
-      </table>
-    </section>
-    <section class="panel">
-      <div class="toolbar">
-        <div>
-          <p class="eyebrow">Leitura socioeconômica</p>
-          <h2>Ausência eleitoral por faixa de renda predominante</h2>
-        </div>
-        <a href="/api/v1/grupos-renda.csv">Exportar grupos</a>
+      <p>Selecione um cabeçalho para ordenar a tabela. A coluna de aptos registrados ajuda a dimensionar a magnitude eleitoral de cada município. Ela preserva o agregado disponível no arquivo local e não representa uma contagem de pessoas únicas.</p>
+      <div class="municipality-table-scroll" role="region" aria-label="Comparação de municípios" tabindex="0">
+        <table>
+          <thead><tr><th><button class="sort" data-sort="municipio">Município</button></th><th><button class="sort" data-sort="total_aptos">Aptos registrados no recorte</button></th><th><button class="sort" data-sort="taxa_abstencao_pct">Eleitores ausentes</button></th><th><button class="sort" data-sort="pib_mil_reais">PIB municipal (R$ mil)</button></th><th><button class="sort" data-sort="sexo_feminino">Sexo feminino</button></th><th><button class="sort" data-sort="sexo_masculino">Sexo masculino</button></th><th><button class="sort" data-sort="escolaridade_predominante">Escolaridade predominante</button></th><th><button class="sort" data-sort="renda_pc_mediana">Renda mediana por pessoa</button></th><th><button class="sort" data-sort="score_vulnerabilidade">Índice de atenção</button></th></tr></thead>
+          <tbody id="ranking"></tbody>
+        </table>
       </div>
-      <table>
-        <thead><tr><th>Grupo</th><th>Municípios</th><th>Abstenção média</th><th>Mediana</th><th>Desvio padrão</th></tr></thead>
-        <tbody id="income-groups"></tbody>
-      </table>
     </section>
     <section class="panel">
       <p class="eyebrow">Pergunte aos dados</p>

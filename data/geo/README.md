@@ -1,11 +1,17 @@
 # Malha municipal da Paraíba
 
-Adicione a malha municipal local em:
+Arquivo consumido pelo dashboard:
 
 ```text
-data/geo/municipios-pb.geojson
+data/geo/geojs-25-mun.json
 ```
 
-O arquivo deve ser um `FeatureCollection` GeoJSON. Cada município deve possuir um código IBGE em uma destas propriedades: `cod_ibge_municipio`, `CD_MUN`, `CD_GEOCMU`, `id`; também é aceito `feature.id`.
+## Estrutura validada
 
-O dashboard do Vozes Ausentes PB carregará o arquivo automaticamente pela rota `GET /api/v1/geojson` e colorirá os municípios pela taxa de abstenção disponível.
+- Formato: `FeatureCollection`.
+- Cobertura: 223 municípios da Paraíba.
+- Geometria: 223 polígonos municipais.
+- Chave territorial: `properties.id`, código IBGE de 7 dígitos.
+- Exibição: `properties.name`.
+
+O dashboard associa os polígonos ao mart analítico pelo código IBGE. Os 10 municípios com dados socioeconômicos cruzados recebem cor conforme a taxa de abstenção; os demais permanecem em cinza até a ampliação dos dados locais.

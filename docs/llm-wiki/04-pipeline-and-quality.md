@@ -20,11 +20,11 @@ Execute `make pipeline`. A mesma combinação de entradas, versão do pipeline e
 - `aptos = comparecimento + abstenções` para todas as linhas.
 - Taxas e percentuais permanecem no intervalo `0` a `100`.
 - Percentuais municipais por faixa somam entre `99,9%` e `100,1%`.
-- Mart publica 10 municípios, exatamente a cobertura socioeconômica local.
+- Mart publica os 223 municípios, exatamente a cobertura socioeconômica local.
 - Relatório detalhado: `data/reports/<snapshot_id>.json`.
 - Documentos contextuais reconstruíveis: `data/rag/<snapshot_id>/<cod_ibge>.json`.
 
-O relatório possui mensagens estruturadas com `level`, `code` e detalhes. Alertas esperados no snapshot local: `SOCIOECONOMIC_PARTIAL_COVERAGE` e `CROSSWALK_LOCAL_NAME_FALLBACK`.
+O relatório possui mensagens estruturadas com `level`, `code` e detalhes. O snapshot atual registra `CROSSWALK_IBGE_CODE`: o arquivo combinado contém código IBGE e permite associar os 223 municípios sem fallback nominal.
 
 ## Score
 

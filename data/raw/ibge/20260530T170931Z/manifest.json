@@ -1,0 +1,26 @@
+{
+  "started_at": "2026-05-30T17:09:31.424554+00:00",
+  "status": "success",
+  "sources": [
+    {
+      "table": "10295",
+      "period": "2022",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/10295/periodos/2022/variaveis/13431%7C13534?localidades=N3%5B25%5D%7CN6%5BN3%5B25%5D%5D&classificacao=2%5B6794%5D%7C86%5B95251%5D%7C58%5B95253%5D",
+      "raw_path": "data/raw/ibge/20260530T170931Z/sidra_10295_2022.json",
+      "sha256": "2e53670b9db6c3c5326a594d6d9b3d4ed4092a84931d2e9b80821a0031031771",
+      "size_bytes": 5563,
+      "standardized_rows": 448
+    },
+    {
+      "table": "10296",
+      "period": "2022",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/10296/periodos/2022/variaveis/13604%7C1013604?localidades=N3%5B25%5D%7CN6%5BN3%5B25%5D%5D&classificacao=2%5B6794%5D%7C86%5B95251%5D%7C386%5B9680%2C9681%2C9682%2C9683%2C9684%2C9685%2C9686%2C9687%2C9688%2C9689%2C9690%2C9692%5D",
+      "raw_path": "data/raw/ibge/20260530T170931Z/sidra_10296_2022.json",
+      "sha256": "629f695ac3bbca4cb26dd03750cc67f0213f4023c9c5aee251f140b9933399c9",
+      "size_bytes": 30830,
+      "standardized_rows": 5376
+    }
+  ],
+  "finished_at": "2026-05-30T17:09:32.192697+00:00",
+  "standardized_rows": 5824
+}

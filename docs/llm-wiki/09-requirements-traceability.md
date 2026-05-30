@@ -16,13 +16,11 @@
 
 | Requisito | Motivo | Comportamento atual |
 | --- | --- | --- |
-| Mapa de calor | `data/geo` não contém GeoJSON ou TopoJSON | Componente pronto; exibe fallback até receber `data/geo/municipios-pb.geojson` |
-| Crosswalk oficial | Arquivo TSE-IBGE não está disponível localmente | Fallback por nome normalizado somente para construir ponte auditável |
+| Crosswalk municipal | Código IBGE incluído no arquivo combinado local | Associação direta dos 223 municípios pelo código IBGE |
 | Auditoria por seção | Eleitoral local já está agregado por município | Pipeline valida unicidade municipal e documenta indisponibilidade de seção |
-| Cobertura de 223 municípios no mart | SIDRA local possui somente 10 municípios | Mart parcial, aviso de cobertura e lista de ausentes |
 | LLM externo e índice vetorial | Nenhum provedor ou banco vetorial foi fornecido | Assistente determinístico e documentos RAG JSON reconstruíveis |
 | PostgreSQL | Ambiente local inicial usa biblioteca padrão | SQLite isolado por repository para substituição futura |
 
-## Não implementar sem novos arquivos locais
+## Não preencher por estimativa
 
-Não preencher as lacunas por download, estimativa ou fonte externa. Quando novos arquivos forem adicionados em `data/`, preservar os schemas canônicos e remover cada degradação com testes específicos.
+Atualizações socioeconômicas podem usar somente a API oficial SIDRA configurada. Não preencher lacunas por estimativa ou fonte não auditável. Quando novos arquivos forem adicionados em `data/`, preservar os schemas canônicos e remover cada degradação com testes específicos.

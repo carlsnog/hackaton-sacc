@@ -17,6 +17,7 @@ Os alvos do `Makefile` executam pipeline, testes e servidor dentro do Podman. N�
 ## Configuração
 
 - Regras do pipeline, caminhos e pesos do score: `config/settings.json`.
+- Consulta oficial SIDRA e parâmetros de ingestão: `config/sidra.json`.
 - Provedor, nomes de variáveis de ambiente e guardrails de IA: `config/ai.json`.
 - Comportamento editável do assistente: `ai/prompts/`.
 - Credenciais opcionais: variáveis descritas em `.env.example`; nenhuma chave é versionada.
@@ -25,6 +26,28 @@ O MVP usa SQLite e a biblioteca padrão do Python para funcionar sem instalaçã
 
 ## Cobertura local
 
-O eleitoral contém 223 municípios PB, já agregados. A renda municipal contém 10 municípios; portanto, o mart cruzado e as análises renda-abstenção têm cobertura parcial. Não foi fornecida malha GeoJSON. O dashboard já possui o componente de mapa de calor e o habilita automaticamente quando `data/geo/municipios-pb.geojson` é adicionado.
+O eleitoral, a renda municipal de 2022 e a malha geográfica contêm os 223 municípios da Paraíba. O dashboard usa `data/geo/geojs-25-mun.json` para exibir o mapa de calor completo.
+
+Para atualizar os indicadores socioeconômicos pela API oficial do SIDRA:
+
+```bash
+make ingest
+make pipeline
+```
+
+## Deploy na Vercel
+
+O deploy da Vercel usa uma Function Python e um snapshot SQLite somente leitura. O assistente local funciona sem chave de LLM.
+
+Atualize e valide o snapshot antes de publicar:
+
+```bash
+make pipeline
+make test
+make deploy-snapshot
+vercel --prod
+```
+
+O arquivo versionável `data/deploy/vozes_ausentes_pb.sqlite3` deve acompanhar o deploy. A Vercel não executa o `Containerfile`; o fluxo Podman continua sendo usado para ingestão, pipeline e testes locais.
 
 Comece a leitura técnica por [`docs/llm-wiki/00-index.md`](docs/llm-wiki/00-index.md). A matriz de entregas e bloqueios locais está em [`docs/llm-wiki/09-requirements-traceability.md`](docs/llm-wiki/09-requirements-traceability.md).

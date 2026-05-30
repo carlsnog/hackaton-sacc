@@ -9,24 +9,24 @@
 
 ## Invariantes
 
-- Use somente arquivos locais em `data/`.
+- Use arquivos locais em `data/`; atualize renda somente pelo ingestor SIDRA oficial configurado.
 - Não trate código TSE como código IBGE.
 - Não use nome municipal como chave analítica final.
-- Não misture faixas de renda de 2010 com renda de 2022 sem exibir ambos os períodos.
+- Preserve o alinhamento temporal atual: renda média, mediana e faixas usam 2022.
 - Não apresente correlação como causalidade.
 - Não delegue aritmética, ranking ou filtros ao modelo de linguagem.
-- Não silencie cobertura parcial, fallback territorial ou ausência de geometria.
+- Não silencie fallback territorial ou limitações do arquivo eleitoral agregado.
 
 ## Pontos de extensão
 
 | Necessidade | Ponto inicial |
 | --- | --- |
-| Novo arquivo local de renda | `config/settings.json` e `pipeline/run_pipeline.py::load_income` |
+| Atualizar renda SIDRA | `config/sidra.json` e `pipeline/ingest_sidra.py` |
 | Crosswalk oficial local | substituir fallback em `pipeline/run_pipeline.py::build_crosswalk` |
 | Dados eleitorais por seção | criar fato de seção e agregador antes de `load_electoral` |
 | PostgreSQL | nova implementação da interface prática de `AnalyticsRepository` |
 | Provedor LLM | adapter separado lendo somente nomes de ambiente de `config/ai.json` |
-| Mapa | adicionar `data/geo/municipios-pb.geojson`; o componente frontend já associa por código IBGE |
+| Mapa | manter `data/geo/geojs-25-mun.json`; o frontend associa `properties.id` ao código IBGE |
 
 ## Artefatos reconstruíveis
 
