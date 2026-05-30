@@ -24,7 +24,7 @@ Execute `make pipeline`. A mesma combinação de entradas, versão do pipeline e
 - Relatório detalhado: `data/reports/<snapshot_id>.json`.
 - Documentos contextuais reconstruíveis: `data/rag/<snapshot_id>/<cod_ibge>.json`.
 
-O relatório possui mensagens estruturadas com `level`, `code` e detalhes. O alerta esperado no snapshot local é `CROSSWALK_LOCAL_NAME_FALLBACK`, pois o crosswalk oficial ainda não foi fornecido como arquivo local.
+O relatório possui mensagens estruturadas com `level`, `code` e detalhes. O snapshot atual registra `CROSSWALK_IBGE_CODE`: o arquivo combinado contém código IBGE e permite associar os 223 municípios sem fallback nominal.
 
 ## Score
 

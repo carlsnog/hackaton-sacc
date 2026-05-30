@@ -16,7 +16,7 @@
 
 | Requisito | Motivo | Comportamento atual |
 | --- | --- | --- |
-| Crosswalk oficial | Arquivo TSE-IBGE não está disponível localmente | Fallback por nome normalizado somente para construir ponte auditável |
+| Crosswalk municipal | Código IBGE incluído no arquivo combinado local | Associação direta dos 223 municípios pelo código IBGE |
 | Auditoria por seção | Eleitoral local já está agregado por município | Pipeline valida unicidade municipal e documenta indisponibilidade de seção |
 | LLM externo e índice vetorial | Nenhum provedor ou banco vetorial foi fornecido | Assistente determinístico e documentos RAG JSON reconstruíveis |
 | PostgreSQL | Ambiente local inicial usa biblioteca padrão | SQLite isolado por repository para substituição futura |

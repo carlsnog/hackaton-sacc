@@ -22,6 +22,10 @@ class FrontendTest(unittest.TestCase):
     def test_ranking_headers_are_sortable(self):
         self.assertIn('data-sort="municipio"', self.html)
         self.assertIn('data-sort="total_aptos"', self.html)
+        self.assertIn('data-sort="pib_mil_reais"', self.html)
+        self.assertIn('data-sort="sexo_feminino"', self.html)
+        self.assertIn('data-sort="sexo_masculino"', self.html)
+        self.assertIn('data-sort="escolaridade_predominante"', self.html)
         self.assertIn("Aptos registrados no recorte", self.html)
         self.assertIn("não representa uma contagem de pessoas únicas", self.html)
         self.assertIn('data-sort="taxa_abstencao_pct"', self.html)
@@ -51,15 +55,20 @@ class FrontendTest(unittest.TestCase):
         self.assertIn('fetch("/api/v1/geojson")', self.js)
         self.assertIn("O mapa de calor será exibido", self.js)
 
-    def test_electoral_scatter_compares_eligible_voters_and_abstention_rate(self):
+    def test_electoral_scatter_compares_gdp_and_abstention_rate(self):
         self.assertIn('id="electoral-scatter"', self.html)
         self.assertIn("renderElectoralScatter(municipalities)", self.js)
-        self.assertIn("Aptos registrados no recorte", self.js)
+        self.assertIn("PIB municipal em R$ mil", self.js)
         self.assertIn("Eleitores ausentes (%)", self.js)
+        self.assertIn("item.pib_mil_reais", self.js)
         self.assertIn("item.taxa_abstencao_pct", self.js)
         self.assertIn("Math.log10", self.js)
         self.assertIn("escala log", self.html)
-        self.assertIn("não representa uma contagem de pessoas únicas", self.html)
+
+    def test_attributes_local_sources_accurately(self):
+        self.assertIn("TSE para os dados eleitorais de 2022", self.html)
+        self.assertIn("IBGE para os indicadores municipais", self.html)
+        self.assertIn("indicadores censitários de renda usam referência de 2022", self.html)
 
     def test_heat_map_uses_complete_municipality_polygons(self):
         self.assertNotIn('geometry.type === "Point"', self.js)

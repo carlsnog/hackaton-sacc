@@ -91,6 +91,12 @@ CREATE TABLE IF NOT EXISTS mart_municipio_eleicao (
   score_vulnerabilidade REAL NOT NULL,
   score_version TEXT NOT NULL,
   score_weights_json TEXT NOT NULL,
+  pib_mil_reais REAL,
+  sexo_feminino INTEGER,
+  sexo_masculino INTEGER,
+  escolaridade_json TEXT NOT NULL DEFAULT '{}',
+  escolaridade_predominante TEXT,
+  escolaridade_predominante_total INTEGER,
   PRIMARY KEY (snapshot_id, cod_ibge_municipio, ano_eleicao, turno, ano_referencia_renda)
 );
 

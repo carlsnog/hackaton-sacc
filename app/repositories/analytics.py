@@ -11,6 +11,10 @@ from pipeline.core import load_json, project_root
 SORT_FIELDS = {
     "municipio": "municipio",
     "total_aptos": "total_aptos",
+    "pib_mil_reais": "pib_mil_reais",
+    "sexo_feminino": "sexo_feminino",
+    "sexo_masculino": "sexo_masculino",
+    "escolaridade_predominante": "escolaridade_predominante",
     "taxa_abstencao_pct": "taxa_abstencao_pct",
     "renda_pc_mediana": "renda_pc_mediana",
     "renda_pc_media": "renda_pc_media",
@@ -61,6 +65,7 @@ class AnalyticsRepository:
     def serialize_municipality(self, row: sqlite3.Row | dict) -> dict:
         item = dict(row)
         item["faixas_renda_pct"] = json.loads(item.pop("faixas_json"))
+        item["escolaridade"] = json.loads(item.pop("escolaridade_json"))
         item["score_weights"] = json.loads(item.pop("score_weights_json"))
         item["score_components"] = {
             "percentil_abstencao": item["percentil_abstencao"],

@@ -27,6 +27,8 @@ class RepositoryAndAssistantTest(unittest.TestCase):
         self.assertIn("percentil_abstencao", detail["score_components"])
         self.assertIn("Até 1/4 de salário mínimo", detail["faixas_renda_pct"])
         self.assertEqual(len(detail["sources"]), 2)
+        self.assertGreater(detail["pib_mil_reais"], 0)
+        self.assertIn("ANALFABETO", detail["escolaridade"])
 
     def test_income_groups_expose_rule_median_and_dispersion(self):
         groups = self.repository.income_groups({})

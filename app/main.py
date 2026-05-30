@@ -78,7 +78,7 @@ class Handler(BaseHTTPRequestHandler):
     def send_export(self, params):
         items = repository.export_municipalities(params)
         output = io.StringIO()
-        fields = ["snapshot_id", "cod_ibge_municipio", "cod_tse_municipio", "municipio", "ano_eleicao", "turno", "ano_referencia_renda", "total_aptos", "taxa_abstencao_pct", "renda_pc_media", "renda_pc_mediana", "pct_baixa_renda", "score_vulnerabilidade"]
+        fields = ["snapshot_id", "cod_ibge_municipio", "cod_tse_municipio", "municipio", "ano_eleicao", "turno", "ano_referencia_renda", "total_aptos", "taxa_abstencao_pct", "pib_mil_reais", "sexo_feminino", "sexo_masculino", "escolaridade_predominante", "escolaridade_predominante_total", "renda_pc_media", "renda_pc_mediana", "pct_baixa_renda", "score_vulnerabilidade"]
         writer = csv.DictWriter(output, fields, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(items)
