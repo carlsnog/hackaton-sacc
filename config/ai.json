@@ -1,5 +1,5 @@
 {
-  "provider": "disabled",
+  "provider": "openai",
   "providers": {
     "openai_compatible": {
       "base_url_env": "LLM_BASE_URL",
@@ -11,7 +11,10 @@
     "system": "ai/prompts/system.txt",
     "methodology": "ai/prompts/methodology.txt",
     "refusal": "ai/prompts/refusal.txt",
-    "help": "ai/prompts/help.txt"
+    "help": "ai/prompts/help.txt",
+    "enrichment": "ai/prompts/enrichment.txt",
+    "enrichment_general": "ai/prompts/enrichment_general.txt",
+    "enrichment_municipality": "ai/prompts/enrichment_municipality.txt"
   },
   "guardrails": {
     "blocked_terms": [
