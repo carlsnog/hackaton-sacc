@@ -21,9 +21,10 @@ echo "------------------------------------------------------------------------"
 
 # Adiciona mapeamento de porta apenas se for rodar o servidor web da aplicação
 PORT_MAPPING=""
-if [[ "$SCRIPT_TO_RUN" == *"app.main"* || "$SCRIPT_TO_RUN" == "-m" ]]; then
+if [[ "$SCRIPT_TO_RUN" == *"app.main"* || "$*" == *"app.main"* || "$SCRIPT_TO_RUN" == "serve" ]]; then
   PORT_MAPPING="-p 8000:8000"
 fi
+
 
 # Executar o container mapeando a pasta atual e passando variáveis de ambiente
 podman run --rm -it \

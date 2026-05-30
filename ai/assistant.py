@@ -124,6 +124,7 @@ class Assistant:
         Um analista de dados local inteligente que responde dúvidas detalhadas 
         usando exclusivamente os CSVs locais de forma determinística, 
         sem fazer qualquer requisição externa (perfeito para redes restritas como a UFCG).
+        Inclui tratamento padrão para perguntas fora do contexto do projeto.
         """
         normalized = normalize_name(question)
         lowered = question.lower()
@@ -263,17 +264,31 @@ class Assistant:
                 "answer": resposta
             }
 
-        # 4. Caso padrão: ajuda
+        # 4. Tratamento padrão: verificar se é saudação/ajuda, senão retornar resposta de recusa padrão de fora de contexto
+        is_greeting_or_help = any(w in lowered for w in ("olá", "ola", "oi", "bom dia", "boa tarde", "boa noite", "ajuda", "help", "como funciona", "como usar", "quem é você", "o que você faz"))
+        
+        if is_greeting_or_help or len(lowered.strip()) < 3:
+            return {
+                "kind": "help",
+                "answer": (
+                    "### 👋 Olá! Sou o Analista Eleitoral Inteligente Local da Paraíba!\n\n"
+                    "Fui adaptado para rodar **100% offline** na rede da UFCG, garantindo acesso completo aos dados sem precisar de internet ou da API da OpenAI!\n\n"
+                    "Você pode me perguntar sobre qualquer cidade paraibana para analisar a relação entre candidatos, abstenções e grau de instrução:\n\n"
+                    "*   *\"Como foi a votação e escolaridade dos candidatos em Sousa?\"*\n"
+                    "*   *\"Qual o perfil dos eleitores de João Pessoa?\"*\n"
+                    "*   *\"Me mostre o resumo eleitoral de Patos\"*\n\n"
+                    "👉 **Basta digitar o nome de uma cidade da Paraíba acima no chat para iniciar o relatório!**"
+                )
+            }
+            
+        # Resposta padrão para perguntas fora do contexto do projeto
         return {
-            "kind": "help",
+            "kind": "out_of_context",
             "answer": (
-                "### 👋 Olá! Sou o Analista Eleitoral Inteligente Local da Paraíba!\n\n"
-                "Fui adaptado para rodar **100% offline** na rede da UFCG, garantindo acesso completo aos dados sem precisar de internet ou da API da OpenAI!\n\n"
-                "Você pode me perguntar sobre qualquer cidade paraibana para analisar a relação entre candidatos, abstenções e grau de instrução:\n\n"
-                "*   *\"Como foi a votação e escolaridade dos candidatos em Sousa?\"*\n"
-                "*   *\"Qual o perfil dos eleitores de João Pessoa?\"*\n"
-                "*   *\"Me mostre o resumo eleitoral de Patos\"*\n\n"
-                "👉 **Basta digitar o nome de uma cidade da Paraíba acima no chat para iniciar o relatório!**"
+                "### 🚫 Pergunta Fora de Contexto\n\n"
+                "Desculpe, mas eu sou um **assistente analítico especializado** e fui desenvolvido para responder exclusivamente a dúvidas sobre o **perfil demográfico, socioeconômico e estatísticas oficiais de votação da Paraíba nas Eleições 2022**.\n\n"
+                "Como não identifiquei nenhuma menção a municípios paraibanos ou termos eleitorais/socioeconômicos em sua pergunta, não posso ajudar com este assunto.\n\n"
+                "👉 **Por favor, envie uma pergunta relacionada às cidades da Paraíba, taxas de abstenção ou escolaridade dos candidatos!**"
             )
         }
 
@@ -292,13 +307,18 @@ class Assistant:
             from openai import OpenAI
             client = OpenAI(api_key=api_key)
 
-            # 1. Definir a persona do sistema
+            # 1. Definir a persona do sistema com regras de contexto estritas
             system_prompt = (
                 "Você é um cientista político especialista em eleições e no perfil do eleitorado do estado da Paraíba (PB).\n"
                 "Seu papel é responder às dúvidas dos usuários de forma inteligente, crítica e politicamente analítica.\n"
                 "Você tem acesso à ferramenta 'obter_dados_cidade' para obter estatísticas reais de qualquer município da Paraíba. "
                 "SEMPRE que o usuário mencionar uma cidade ou perguntar sobre ela, use a ferramenta para buscar os dados correspondentes.\n"
-                "Ao analisar os dados obtidos:\n"
+                "REGRAS DE CONTEXTO E RECUSA:\n"
+                "- Se o usuário fizer uma pergunta que esteja completamente fora do contexto eleitoral, demográfico ou socioeconômico da Paraíba "
+                "(por exemplo, receitas de bolo, ajuda com programação, curiosidades gerais aleatórias, etc.), você deve recusar responder educadamente.\n"
+                "- Como resposta de recusa, use exatamente ou de forma muito próxima a seguinte resposta padrão:\n"
+                "  'Desculpe, mas eu sou um assistente especializado e fui desenvolvido para responder exclusivamente a dúvidas sobre o perfil demográfico, socioeconômico e estatísticas de votação da Paraíba nas Eleições 2022. Por favor, envie uma pergunta relacionada a cidades paraibanas, taxas de abstenção ou perfil dos candidatos!'\n"
+                "Ao analisar os dados eleitorais válidos:\n"
                 "- Identifique quem venceu para Presidente e Governador na cidade.\n"
                 "- Analise as abstenções, votos nulos e brancos.\n"
                 "- Relacione de forma crítica os resultados dos candidatos com o grau de escolaridade dos eleitores "
