@@ -14,8 +14,11 @@ class RepositoryAndAssistantTest(unittest.TestCase):
 
     def test_summary_is_weighted_and_traceable(self):
         summary = self.repository.summary({})
-        self.assertEqual(summary["municipios_validos"], 10)
-        self.assertAlmostEqual(summary["taxa_abstencao_pct"], 14.855234529554938)
+        self.assertEqual(summary["municipios_validos"], 223)
+        self.assertAlmostEqual(summary["taxa_abstencao_pct"], 17.013058255630266)
+        self.assertEqual(summary["eleitores_aptos_paraiba"], 3225826)
+        self.assertEqual(summary["abrangencia_eleitores_paraiba_pct"], 100)
+        self.assertEqual(summary["abrangencia_territorial_pct"], 100)
         self.assertEqual(len(summary["sources"]), 2)
 
     def test_detail_exposes_score_components_and_faixas(self):
@@ -24,6 +27,8 @@ class RepositoryAndAssistantTest(unittest.TestCase):
         self.assertIn("percentil_abstencao", detail["score_components"])
         self.assertIn("Até 1/4 de salário mínimo", detail["faixas_renda_pct"])
         self.assertEqual(len(detail["sources"]), 2)
+        self.assertGreater(detail["pib_mil_reais"], 0)
+        self.assertIn("ANALFABETO", detail["escolaridade"])
 
     def test_income_groups_expose_rule_median_and_dispersion(self):
         groups = self.repository.income_groups({})
@@ -33,7 +38,11 @@ class RepositoryAndAssistantTest(unittest.TestCase):
         self.assertIn("taxa_abstencao_desvio_padrao", groups[0])
 
     def test_export_is_not_paginated(self):
-        self.assertEqual(len(self.repository.export_municipalities({})), 10)
+        self.assertEqual(len(self.repository.export_municipalities({})), 223)
+
+    def test_municipalities_can_be_sorted_by_eligible_voters(self):
+        items = self.repository.list_municipalities({"sort": "total_aptos", "order": "desc"})["items"]
+        self.assertGreaterEqual(items[0]["total_aptos"], items[-1]["total_aptos"])
 
     def test_status_keeps_healthcheck_compact(self):
         status = self.repository.pipeline_status()

@@ -22,6 +22,10 @@ Filtros temporais: `ano_eleicao`, `turno`, `ano_renda`, `snapshot_id`. Lista: `b
 
 ## Métricas do snapshot inicial
 
-No mart parcial: 10 municípios; 2.633.570 aptos; 391.223 abstenções; taxa ponderada `14,8552%`. Pearson (`0,1241`) e Spearman (`0,0365`) continuam disponíveis na API para auditoria, mas não são destacados na interface porque a cobertura local é parcial e os resultados não sustentam uma leitura útil para o público final.
+No mart completo: 223 municípios; taxa ponderada de abstenção `17,0131%`. Os 223 municípios abrangem `100%` do território e dos 3.225.826 eleitores aptos informados para a Paraíba. O arquivo eleitoral local preserva somas agregadas próprias para o cálculo auditável da taxa; essas somas não são exibidas como contagem de eleitores únicos.
 
-O dashboard apresenta cartões explicativos, mapa de calor com fallback, dispersão com escalas visíveis desde zero, tabela ordenável e grupos por faixa predominante. O mapa é habilitado automaticamente quando `data/geo/municipios-pb.geojson` existe.
+O dashboard apresenta cartões explicativos, mapa de calor, dispersões com escalas visíveis e tabela ordenável. A agregação por faixa predominante continua disponível via API, mas não é exibida na interface. A tabela municipal inclui `total_aptos`, `pib_mil_reais`, totais por sexo e escolaridade predominante. Há uma dispersão adicional que compara `pib_mil_reais` no eixo X logarítmico e `taxa_abstencao_pct` no eixo Y. O mapa usa `data/geo/geojs-25-mun.json`, que contém polígonos para os 223 municípios. Todos são coloridos pela taxa de abstenção.
+
+As fontes locais são atribuídas de forma separada: TSE para os dados eleitorais de 2022 e IBGE para os indicadores municipais. A renda censitária usa referência de 2022. PIB municipal não deve ser descrito genericamente como indicador do Censo sem metadado temporal explícito no arquivo local.
+
+A identidade visual usa a paleta base `#c95a2c`, `#4d382c` e `#d7d9d3`: terracota para ações e destaques, marrom para hierarquia textual e cinza para superfícies neutras. Não há imagem decorativa de fundo. O mapa de calor usa uma escala sequencial própria em tons de vermelho claro a escuro, adequada à intensidade da abstenção.

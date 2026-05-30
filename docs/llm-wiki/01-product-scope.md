@@ -16,6 +16,6 @@ Analisar associação territorial entre renda domiciliar per capita e abstençã
 ## Recorte efetivo
 
 - Eleitoral: PB, 2022, turno local sintético `1`, 223 municípios.
-- Renda média e mediana: 2022, 10 municípios.
-- Faixas de renda: 2010, os mesmos 10 municípios.
-- Snapshot validado: `62ecea2fb0a428d8` (`pipeline_version=local-mvp-v2`).
+- Renda média e mediana: 2022, 223 municípios.
+- Faixas de renda por moradores: 2022, 223 municípios.
+- Snapshot validado: `3f0275af69e66c4f` (`pipeline_version=local-mvp-v4`).

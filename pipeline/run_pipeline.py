@@ -19,6 +19,17 @@ from pipeline.core import (
     stable_snapshot_id,
 )
 
+SCHOOLING_FIELDS = (
+    "ANALFABETO",
+    "ENSINO FUNDAMENTAL COMPLETO",
+    "ENSINO FUNDAMENTAL INCOMPLETO",
+    "ENSINO MÉDIO COMPLETO",
+    "ENSINO MÉDIO INCOMPLETO",
+    "LÊ E ESCREVE",
+    "SUPERIOR COMPLETO",
+    "SUPERIOR INCOMPLETO",
+)
+
 
 def now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -31,6 +42,17 @@ def read_csv(path: Path) -> list[dict]:
 
 def create_schema(connection: sqlite3.Connection) -> None:
     connection.executescript((project_root() / "pipeline/schema.sql").read_text(encoding="utf-8"))
+    existing = {row[1] for row in connection.execute("PRAGMA table_info(mart_municipio_eleicao)")}
+    for name, definition in (
+        ("pib_mil_reais", "REAL"),
+        ("sexo_feminino", "INTEGER"),
+        ("sexo_masculino", "INTEGER"),
+        ("escolaridade_json", "TEXT NOT NULL DEFAULT '{}'"),
+        ("escolaridade_predominante", "TEXT"),
+        ("escolaridade_predominante_total", "INTEGER"),
+    ):
+        if name not in existing:
+            connection.execute(f"ALTER TABLE mart_municipio_eleicao ADD COLUMN {name} {definition}")
 
 
 def add_quality(quality: dict, level: str, code: str, message: str, **details) -> None:
@@ -38,7 +60,10 @@ def add_quality(quality: dict, level: str, code: str, message: str, **details) -
 
 
 def load_electoral(rows: list[dict], quality: dict) -> list[dict]:
-    required = {"SG_UF", "CD_MUNICIPIO", "NM_MUNICIPIO", "QT_APTOS", "QT_COMPARECIMENTO", "QT_ABSTENCAO"}
+    required = {
+        "SG_UF", "CD_MUNICIPIO", "NM_MUNICIPIO", "QT_APTOS", "QT_COMPARECIMENTO", "QT_ABSTENCAO",
+        "codigo_ibge", "pib_mil_reais", "FEMININO", "MASCULINO", *SCHOOLING_FIELDS,
+    }
     if not rows or not required.issubset(rows[0]):
         raise ValueError("Arquivo eleitoral sem colunas obrigatorias")
     result = []
@@ -56,6 +81,8 @@ def load_electoral(rows: list[dict], quality: dict) -> list[dict]:
         if aptos != comparecimento + abstencoes:
             raise ValueError(f"Falha de reconciliacao eleitoral em {code}")
         taxa = abstention_rate(abstencoes, aptos)
+        schooling = {field: int(float(row[field])) for field in SCHOOLING_FIELDS}
+        schooling_predominant = max(schooling, key=schooling.get)
         if taxa is None:
             add_quality(quality, "warning", "ELECTORAL_ZERO_DENOMINATOR", "Municipio sem eleitores aptos", cod_tse=code)
         elif not 0 <= taxa <= 100:
@@ -70,10 +97,17 @@ def load_electoral(rows: list[dict], quality: dict) -> list[dict]:
                 "brancos": int(row["VOTOS_BRANCOS"]),
                 "nulos": int(row["VOTOS_NULOS"]),
                 "taxa": taxa or 0.0,
+                "cod_ibge": row["codigo_ibge"].strip(),
+                "pib_mil_reais": float(row["pib_mil_reais"]),
+                "sexo_feminino": int(float(row["FEMININO"])),
+                "sexo_masculino": int(float(row["MASCULINO"])),
+                "escolaridade": schooling,
+                "escolaridade_predominante": schooling_predominant,
+                "escolaridade_predominante_total": schooling[schooling_predominant],
             }
         )
     quality["electoral"] = {
-        "grain": "municipio agregado; secoes indisponiveis na fonte local",
+        "grain": "municipio agregado; inclui contexto local de PIB, sexo e escolaridade",
         "rows": len(result),
         "reconciliation_errors": 0,
         "expected_pb_municipalities": 223,
@@ -141,36 +175,31 @@ def load_income(rows: list[dict], low_income_categories: list[str], quality: dic
 
 
 def build_crosswalk(electoral: list[dict], income: list[dict], quality: dict) -> tuple[list[dict], list[dict]]:
+    income_by_code = {row["cod_ibge"]: row for row in income}
     income_by_name = {normalize_name(row["municipio"]): row for row in income}
     dimension, unmatched = [], []
     for row in electoral:
         normalized = normalize_name(row["municipio"])
-        matched = income_by_name.get(normalized)
+        matched = income_by_code.get(row["cod_ibge"]) or income_by_name.get(normalized)
+        method = "provided_ibge_code" if row["cod_ibge"] in income_by_code else "local_name_fallback"
         dimension.append(
             {
                 "cod_tse": row["cod_tse"],
                 "cod_ibge": matched["cod_ibge"] if matched else None,
                 "municipio": row["municipio"],
                 "normalized": normalized,
-                "method": "local_name_fallback" if matched else "unmatched_local_source",
+                "method": method if matched else "unmatched_local_source",
             }
         )
         if not matched:
             unmatched.append({"cod_tse_municipio": row["cod_tse"], "municipio": row["municipio"]})
     quality["crosswalk"] = {
-        "method": "local_name_fallback",
+        "method": "provided_ibge_code",
         "matched": len(dimension) - len(unmatched),
         "unmatched": len(unmatched),
-        "warning": "Crosswalk oficial nao foi fornecido; nomes sao usados somente para construir a ponte auditavel local.",
+        "warning": None,
     }
-    add_quality(
-        quality,
-        "warning",
-        "CROSSWALK_LOCAL_NAME_FALLBACK",
-        "Crosswalk oficial ausente; correspondencias locais foram construidas por nome normalizado",
-        matched=len(dimension) - len(unmatched),
-        unmatched=len(unmatched),
-    )
+    add_quality(quality, "info", "CROSSWALK_IBGE_CODE", "Correspondencias construidas pelo codigo IBGE presente na fonte local", matched=len(dimension) - len(unmatched), unmatched=len(unmatched))
     return dimension, unmatched
 
 
@@ -210,6 +239,11 @@ def write_rag_documents(connection: sqlite3.Connection, snapshot_id: str, direct
                 "faixa_renda_predominante": data["faixa_renda_predominante"],
                 "score_vulnerabilidade": data["score_vulnerabilidade"],
                 "score_weights": json.loads(data["score_weights_json"]),
+                "pib_mil_reais": data["pib_mil_reais"],
+                "sexo_feminino": data["sexo_feminino"],
+                "sexo_masculino": data["sexo_masculino"],
+                "escolaridade": json.loads(data["escolaridade_json"]),
+                "escolaridade_predominante": data["escolaridade_predominante"],
             },
             "sources": sources,
             "text": (
@@ -218,6 +252,9 @@ def write_rag_documents(connection: sqlite3.Connection, snapshot_id: str, direct
                 f"Taxa de abstencao: {data['taxa_abstencao_pct']:.2f}%. "
                 f"Diferenca contra a taxa ponderada do recorte local: {delta:+.2f} pontos percentuais. "
                 f"Renda domiciliar per capita mediana: R$ {data['renda_pc_mediana']:.2f}. "
+                f"PIB municipal: R$ {data['pib_mil_reais']:.2f} mil. "
+                f"Sexo feminino: {data['sexo_feminino']}; sexo masculino: {data['sexo_masculino']}. "
+                f"Escolaridade predominante: {data['escolaridade_predominante']}. "
                 f"Faixa de renda predominante: {data['faixa_renda_predominante']} "
                 f"({data['faixa_renda_predominante_pct']:.2f}%). "
                 f"Score exploratorio: {data['score_vulnerabilidade']:.2f}/100. "
@@ -297,9 +334,16 @@ def run(config_path: str = "config/settings.json") -> str:
                 income_row["pct_baixa_renda"], income_row["faixa_predominante"], income_row["faixa_predominante_pct"],
                 abst_ranks[index], income_low, low_ranks[index], score, config["score"]["version"],
                 json.dumps(weights, ensure_ascii=False, sort_keys=True),
+                vote["pib_mil_reais"], vote["sexo_feminino"], vote["sexo_masculino"],
+                json.dumps(vote["escolaridade"], ensure_ascii=False, sort_keys=True),
+                vote["escolaridade_predominante"], vote["escolaridade_predominante_total"],
             ))
-        connection.executemany("INSERT OR IGNORE INTO mart_municipio_eleicao VALUES (" + ",".join("?" * 28) + ")", mart_rows)
-        quality["mart"] = {"rows": len(mart_rows), "coverage": "partial", "missing_income": 223 - len(mart_rows)}
+        connection.executemany("INSERT OR IGNORE INTO mart_municipio_eleicao VALUES (" + ",".join("?" * 34) + ")", mart_rows)
+        quality["mart"] = {
+            "rows": len(mart_rows),
+            "coverage": "complete" if len(mart_rows) == 223 else "partial",
+            "missing_income": 223 - len(mart_rows),
+        }
         add_quality(quality, "info", "MART_PUBLISHED", "Mart analitico publicado", rows=len(mart_rows), snapshot_id=snapshot_id)
         quality["status"], quality["finished_at"] = "success", now()
         connection.execute(
