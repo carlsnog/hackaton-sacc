@@ -23,6 +23,14 @@ class FrontendTest(unittest.TestCase):
         self.assertIn('data-sort="renda_pc_mediana"', self.html)
         self.assertIn('data-sort="score_vulnerabilidade"', self.html)
 
+    def test_explains_relationship_between_public_indicators(self):
+        self.assertIn("O que os números mostram em conjunto?", self.html)
+        self.assertIn("Eleitores ausentes", self.html)
+        self.assertIn("renda mediana por pessoa", self.html)
+        self.assertIn("índice de atenção", self.html)
+        self.assertIn("quanto menor a renda relativa do município, maior tende a ser a contribuição da renda para o índice", self.html)
+        self.assertIn("não significa que a renda seja a causa da abstenção", self.html)
+
     def test_scatter_starts_y_axis_at_zero_and_map_has_local_fallback(self):
         self.assertIn("index * 5", self.js)
         self.assertIn("const minX = 550", self.js)
