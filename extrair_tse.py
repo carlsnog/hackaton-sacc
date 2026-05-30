@@ -2,6 +2,7 @@ import requests
 import pandas as pd
 import io
 import zipfile
+import os
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
@@ -10,119 +11,214 @@ headers = {
 id_pacote = "resultados-2022"
 url_pacote = f"https://dadosabertos.tse.jus.br/api/3/action/package_show?id={id_pacote}"
 
+print("1. Conectando à API de Recursos do TSE...")
+
 try:
-    print("1. Conectando à API de Resultados de 2022 do TSE...")
     resposta = requests.get(url_pacote, headers=headers)
     resposta.raise_for_status()
     recursos = resposta.json()['result']['resources']
     
-    url_presi = None
-    url_gov = None
+    url_zip = None
+    url_zip_detalhe = None
     
-    # Identifica os dois ZIPs necessários no catálogo da API
+    # Procura pelos arquivos corretos de Votação Nominal e Detalhe da Apuração
     for r in recursos:
-        url_link = r['url'].lower()
-        if 'historico_totalizacao_presidente_br_1t_2022' in url_link:
-            url_presi = r['url']
-        elif 'historico_totalizacao_governador_uf_1t_2022' in url_link:
-            url_gov = r['url']
+        nome_recurso = r.get('name', '').lower()
+        url_link = r.get('url', '').lower()
+        if 'votação nominal por município e zona' in nome_recurso or 'votacao_nominal_municipio_zona' in url_link:
+            url_zip = r['url']
+        elif 'detalhe da apuração por município e zona' in nome_recurso or 'detalhe_votacao_munzona' in url_link:
+            url_zip_detalhe = r['url']
 
-    # --- PARTE 1: PRESIDENTE (NACIONAL) ---
-    if url_presi:
-        print("\n2. Processando dados da Presidência...")
-        content_presi = requests.get(url_presi, headers=headers).content
-        with zipfile.ZipFile(io.BytesIO(content_presi)) as z:
-            df = pd.read_csv(z.open(z.namelist()[0]), sep=';', encoding='iso-8859-1')
+    if url_zip and url_zip_detalhe:
+        # --- PARTE A: CARREGAMENTO DOS VOTOS NOMINAIS (CACHE LOCAL) ---
+        zip_local = "votacao_nominal_2022.zip"
+        if os.path.exists(zip_local):
+            print("2a. Carregando o arquivo compactado de Votação Nominal do cache local...")
+            with open(zip_local, 'rb') as lf:
+                conteudo_zip = lf.read()
+        else:
+            print("2a. Baixando o arquivo compactado de Votação Nominal...")
+            print("Aguarde um instante...")
+            conteudo_zip = requests.get(url_zip, headers=headers).content
+            with open(zip_local, 'wb') as lf:
+                lf.write(conteudo_zip)
+            print("-> [Sucesso] Votação Nominal em cache local.")
             
-            # Limpeza radical de caracteres invisíveis no cabeçalho
-            df.columns = df.columns.str.replace(r'\s+', '', regex=True).str.strip()
-            ultima_linha = df.iloc[-1]
-            
-            total_aptos = int(ultima_linha['QT_APTOS_TOTAL'])
-            total_comp = int(ultima_linha['QT_VOTOS_TOTAL_ACUMULADO'])
-            total_abst = total_aptos - total_comp
-            
-            print("\n========================================================")
-            print("    PARTICIPAÇÃO E ABSTENÇÃO - PRESIDÊNCIA 1º TURNO 2022")
-            print("========================================================")
-            print(f"Eleitores Aptos:      {total_aptos:>15,.0f}".replace(",", "."))
-            print(f"Total Comparecimento: {total_comp:>15,.0f} | {(total_comp/total_aptos)*100:.2f}%".replace(",", "."))
-            print(f"Total Abstenção:      {total_abst:>15,.0f} | {(total_abst/total_aptos)*100:.2f}%".replace(",", "."))
-            print("========================================================\n")
-            
-            # Mapeia os votos de forma dinâmica olhando o final da coluna
-            votos_brancos = int(ultima_linha['BRANCO_QT_VOTOS_TOT_ACUMULADO'])
-            votos_nulos = int(ultima_linha['NULO_QT_VOTOS_TOT_ACUMULADO'])
-            votos_validos = total_comp - votos_brancos - votos_nulos
-            
-            print("========================================================")
-            print("          PLACAR COMPLETO (PRESIDENTE - BRASIL)         ")
-            print("========================================================")
-            print(f"{'Candidato / Opção':<22} | {'Votos Absolutos':<15} | {'%'}")
-            print("-" * 56)
-            
-            # Varre as colunas dinamicamente buscando os acumulados
-            for col in df.columns:
-                if col.endswith('_QT_VOTOS_TOT_ACUMULADO'):
-                    nome_cand = col.replace('_QT_VOTOS_TOT_ACUMULADO', '').replace('_', ' ').title()
-                    votos = int(ultima_linha[col])
-                    
-                    if votos > 0: # Ignora candidatos com zero votos se houver
-                        porcentagem = (votos / votos_validos) * 100
-                        print(f"{nome_cand:<22} | {votos:>15,.0f} | {porcentagem:.2f}% s/ Válidos".replace(",", "."))
-            
-            print(f"{'Votos Brancos':<22} | {votos_brancos:>15,.0f} | {(votos_brancos/total_comp)*100:.2f}% s/ Total".replace(",", "."))
-            print(f"{'Votos Nulos':<22} | {votos_nulos:>15,.0f} | {(votos_nulos/total_comp)*100:.2f}% s/ Total".replace(",", "."))
-            print("========================================================")
+        # --- PARTE B: CARREGAMENTO DO DETALHE DA APURAÇÃO (CACHE LOCAL) ---
+        zip_local_detalhe = "detalhe_votacao_munzona_2022.zip"
+        if os.path.exists(zip_local_detalhe):
+            print("2b. Carregando o arquivo de Detalhe da Apuração do cache local...")
+            with open(zip_local_detalhe, 'rb') as lf:
+                conteudo_zip_detalhe = lf.read()
+        else:
+            print("2b. Baixando o arquivo compactado de Detalhe da Apuração...")
+            print("Aguarde um instante...")
+            conteudo_zip_detalhe = requests.get(url_zip_detalhe, headers=headers).content
+            with open(zip_local_detalhe, 'wb') as lf:
+                lf.write(conteudo_zip_detalhe)
+            print("-> [Sucesso] Detalhe da Apuração em cache local.")
 
-    # --- PARTE 2: GOVERNADOR (PARAÍBA) ---
-    if url_gov:
-        print("\n3. Processando dados de Governador para a Paraíba (PB)...")
-        content_gov = requests.get(url_gov, headers=headers).content
-        with zipfile.ZipFile(io.BytesIO(content_gov)) as z:
+        # ========================================================
+        # --- PARTE 1: PRESIDENTE (PARAÍBA) ---
+        # ========================================================
+        print("\n3. Processando dados da Presidência para a Paraíba (PB)...")
+        
+        # 1.1 Votos Nominais
+        with zipfile.ZipFile(io.BytesIO(conteudo_zip)) as z:
+            arq_br = [arq for arq in z.namelist() if 'BR.csv' in arq.upper() or '_BR' in arq.upper()][0]
+            with z.open(arq_br) as f:
+                colunas_nominais = ['NR_TURNO', 'SG_UF', 'DS_CARGO', 'NM_URNA_CANDIDATO', 'QT_VOTOS_NOMINAIS']
+                df_nom = pd.read_csv(f, sep=';', encoding='iso-8859-1', usecols=colunas_nominais)
+                
+                df_nom.columns = df_nom.columns.str.strip()
+                df_nom['DS_CARGO'] = df_nom['DS_CARGO'].str.strip()
+                df_nom['NM_URNA_CANDIDATO'] = df_nom['NM_URNA_CANDIDATO'].str.strip()
+                df_nom['SG_UF'] = df_nom['SG_UF'].str.strip()
+                
+                # Filtra apenas 1º turno, cargo de Presidente e estado da Paraíba
+                df_pres_filtrado = df_nom[(df_nom['NR_TURNO'] == 1) & 
+                                          (df_nom['DS_CARGO'].str.lower() == 'presidente') & 
+                                          (df_nom['SG_UF'] == 'PB')]
+                
+                placar_pres_cands = df_pres_filtrado.groupby('NM_URNA_CANDIDATO')['QT_VOTOS_NOMINAIS'].sum().reset_index()
+                placar_pres_cands.columns = ['NM_VOTAVEL', 'QT_VOTOS']
+
+        # 1.2 Detalhes de comparecimento, abstenção, branco e nulo
+        with zipfile.ZipFile(io.BytesIO(conteudo_zip_detalhe)) as z_det:
+            arq_det_br = [arq for arq in z_det.namelist() if 'BR.csv' in arq.upper() or '_BR' in arq.upper()][0]
+            with z_det.open(arq_det_br) as f_det:
+                colunas_detalhe = ['NR_TURNO', 'SG_UF', 'DS_CARGO', 'QT_APTOS', 'QT_COMPARECIMENTO', 'QT_ABSTENCOES', 'QT_VOTOS_BRANCOS', 'QT_TOTAL_VOTOS_NULOS']
+                df_det = pd.read_csv(f_det, sep=';', encoding='iso-8859-1', usecols=colunas_detalhe)
+                
+                df_det.columns = df_det.columns.str.strip()
+                df_det['DS_CARGO'] = df_det['DS_CARGO'].str.strip()
+                df_det['SG_UF'] = df_det['SG_UF'].str.strip()
+                
+                df_det_filtrado = df_det[(df_det['NR_TURNO'] == 1) & 
+                                         (df_det['DS_CARGO'].str.lower() == 'presidente') & 
+                                         (df_det['SG_UF'] == 'PB')]
+                
+                pres_aptos = df_det_filtrado['QT_APTOS'].sum()
+                pres_comparecimento = df_det_filtrado['QT_COMPARECIMENTO'].sum()
+                pres_abstencoes = df_det_filtrado['QT_ABSTENCOES'].sum()
+                pres_brancos = df_det_filtrado['QT_VOTOS_BRANCOS'].sum()
+                pres_nulos = df_det_filtrado['QT_TOTAL_VOTOS_NULOS'].sum()
+
+        # Consolidação da tabela de Presidente na PB
+        df_pres_brancos = pd.DataFrame([{'NM_VOTAVEL': 'VOTO BRANCO', 'QT_VOTOS': pres_brancos}])
+        df_pres_nulos = pd.DataFrame([{'NM_VOTAVEL': 'VOTO NULO', 'QT_VOTOS': pres_nulos}])
+        
+        placar_pres = pd.concat([placar_pres_cands, df_pres_brancos, df_pres_nulos], ignore_index=True)
+        placar_pres = placar_pres.sort_values(by='QT_VOTOS', ascending=False).reset_index(drop=True)
+        
+        print("\n========================================================")
+        print("    PARTICIPAÇÃO E ABSTENÇÃO - PRESIDÊNCIA (PARAÍBA)")
+        print("========================================================")
+        print(f"Eleitores Aptos (PB): {pres_aptos:>15,.0f}".replace(",", "."))
+        print(f"Total Comparecimento: {pres_comparecimento:>15,.0f} | {(pres_comparecimento/pres_aptos)*100:.2f}%".replace(",", "."))
+        print(f"Total Abstenção (PB): {pres_abstencoes:>15,.0f} | {(pres_abstencoes/pres_aptos)*100:.2f}%".replace(",", "."))
+        print("========================================================\n")
+        
+        print("========================================================")
+        print("          PLACAR COMPLETO (PRESIDENTE - PARAÍBA)        ")
+        print("========================================================")
+        print(f"{'Candidato / Opção':<22} | {'Votos Absolutos':<15} | {'%'}")
+        print("-" * 56)
+        
+        pres_validos = pres_comparecimento - pres_brancos - pres_nulos
+        
+        for _, linha in placar_pres.iterrows():
+            nome = linha['NM_VOTAVEL']
+            votos = linha['QT_VOTOS']
             
-            # O arquivo de governadores vem dividido por UF dentro do zip. Vamos caçar o da PB:
-            arq_pb = [arq for arq in z.namelist() if 'PB' in arq.upper()][0]
+            if nome in ['VOTO BRANCO', 'VOTO NULO']:
+                pct = (votos / pres_comparecimento) * 100
+                tipo = "s/ Total"
+            else:
+                pct = (votos / pres_validos) * 100
+                tipo = "s/ Válidos"
+                
+            print(f"{nome:<22} | {votos:>15,.0f} | {pct:.2f}% {tipo}".replace(",", "."))
+        print("========================================================")
+
+        # ========================================================
+        # --- PARTE 2: GOVERNADOR (PARAÍBA) ---
+        # ========================================================
+        print("\n4. Processando dados de Governador para a Paraíba (PB)...")
+        
+        # 2.1 Votos Nominais
+        with zipfile.ZipFile(io.BytesIO(conteudo_zip)) as z:
+            arq_pb = [arq for arq in z.namelist() if 'PB.csv' in arq.upper() or '_PB' in arq.upper()][0]
+            with z.open(arq_pb) as f:
+                colunas_nominais = ['NR_TURNO', 'SG_UF', 'DS_CARGO', 'NM_URNA_CANDIDATO', 'QT_VOTOS_NOMINAIS']
+                df_gov = pd.read_csv(f, sep=';', encoding='iso-8859-1', usecols=colunas_nominais)
+                
+                df_gov.columns = df_gov.columns.str.strip()
+                df_gov['DS_CARGO'] = df_gov['DS_CARGO'].str.strip()
+                df_gov['NM_URNA_CANDIDATO'] = df_gov['NM_URNA_CANDIDATO'].str.strip()
+                
+                df_gov_filtrado = df_gov[(df_gov['NR_TURNO'] == 1) & (df_gov['DS_CARGO'].str.lower() == 'governador')]
+                placar_gov_cands = df_gov_filtrado.groupby('NM_URNA_CANDIDATO')['QT_VOTOS_NOMINAIS'].sum().reset_index()
+                placar_gov_cands.columns = ['NM_VOTAVEL', 'QT_VOTOS']
+
+        # 2.2 Detalhes de comparecimento, abstenção, branco e nulo
+        with zipfile.ZipFile(io.BytesIO(conteudo_zip_detalhe)) as z_det:
+            arq_pb_det = [arq for arq in z_det.namelist() if 'PB.csv' in arq.upper() or '_PB' in arq.upper()][0]
+            with z_det.open(arq_pb_det) as f_det:
+                colunas_detalhe = ['NR_TURNO', 'SG_UF', 'DS_CARGO', 'QT_APTOS', 'QT_COMPARECIMENTO', 'QT_ABSTENCOES', 'QT_VOTOS_BRANCOS', 'QT_TOTAL_VOTOS_NULOS']
+                df_det = pd.read_csv(f_det, sep=';', encoding='iso-8859-1', usecols=colunas_detalhe)
+                
+                df_det.columns = df_det.columns.str.strip()
+                df_det['DS_CARGO'] = df_det['DS_CARGO'].str.strip()
+                
+                df_det_filtrado = df_det[(df_det['NR_TURNO'] == 1) & (df_det['DS_CARGO'].str.lower() == 'governador')]
+                
+                gov_aptos = df_det_filtrado['QT_APTOS'].sum()
+                gov_comparecimento = df_det_filtrado['QT_COMPARECIMENTO'].sum()
+                gov_abstencoes = df_det_filtrado['QT_ABSTENCOES'].sum()
+                gov_brancos = df_det_filtrado['QT_VOTOS_BRANCOS'].sum()
+                gov_nulos = df_det_filtrado['QT_TOTAL_VOTOS_NULOS'].sum()
+
+        # Consolidação da tabela de Governador na PB
+        df_gov_brancos = pd.DataFrame([{'NM_VOTAVEL': 'VOTO BRANCO', 'QT_VOTOS': gov_brancos}])
+        df_gov_nulos = pd.DataFrame([{'NM_VOTAVEL': 'VOTO NULO', 'QT_VOTOS': gov_nulos}])
+        
+        placar_gov = pd.concat([placar_gov_cands, df_gov_brancos, df_gov_nulos], ignore_index=True)
+        placar_gov = placar_gov.sort_values(by='QT_VOTOS', ascending=False).reset_index(drop=True)
+        
+        print("\n========================================================")
+        print("     PARTICIPAÇÃO E ABSTENÇÃO - GOVERNADOR (PARAÍBA)    ")
+        print("==================================================")
+        print(f"Eleitores Aptos (PB): {gov_aptos:>15,.0f}".replace(",", "."))
+        print(f"Total Comparecimento: {gov_comparecimento:>15,.0f} | {(gov_comparecimento/gov_aptos)*100:.2f}%".replace(",", "."))
+        print(f"Total Abstenção (PB): {gov_abstencoes:>15,.0f} | {(gov_abstencoes/gov_aptos)*100:.2f}%".replace(",", "."))
+        print("========================================================\n")
+        
+        print("========================================================")
+        print("          PLACAR COMPLETO (GOVERNADOR - PARAÍBA)        ")
+        print("========================================================")
+        print(f"{'Candidato / Opção':<22} | {'Votos Absolutos':<15} | {'%'}")
+        print("-" * 56)
+        
+        gov_validos = gov_comparecimento - gov_brancos - gov_nulos
+        
+        for _, linha in placar_gov.iterrows():
+            nome = linha['NM_VOTAVEL']
+            votos = linha['QT_VOTOS']
             
-            df_gov = pd.read_csv(z.open(arq_pb), sep=';', encoding='iso-8859-1')
-            df_gov.columns = df_gov.columns.str.replace(r'\s+', '', regex=True).str.strip()
-            
-            ultima_linha_gov = df_gov.iloc[-1]
-            
-            gov_aptos = int(ultima_linha_gov['QT_APTOS_TOTAL'])
-            gov_comp = int(ultima_linha_gov['QT_VOTOS_TOTAL_ACUMULADO'])
-            gov_abst = gov_aptos - gov_comp
-            
-            print("\n========================================================")
-            print("     PARTICIPAÇÃO E ABSTENÇÃO - GOVERNADOR (PARAÍBA)    ")
-            print("========================================================")
-            print(f"Eleitores Aptos (PB): {gov_aptos:>15,.0f}".replace(",", "."))
-            print(f"Total Comparecimento: {gov_comp:>15,.0f} | {(gov_comp/gov_aptos)*100:.2f}%".replace(",", "."))
-            print(f"Total Abstenção (PB): {gov_abst:>15,.0f} | {(gov_abst/gov_aptos)*100:.2f}%".replace(",", "."))
-            print("========================================================\n")
-            
-            gov_brancos = int(ultima_linha_gov['BRANCO_QT_VOTOS_TOT_ACUMULADO'])
-            gov_nulos = int(ultima_linha_gov['NULO_QT_VOTOS_TOT_ACUMULADO'])
-            gov_validos = gov_comp - gov_brancos - gov_nulos
-            
-            print("========================================================")
-            print("          PLACAR COMPLETO (GOVERNADOR - PARAÍBA)        ")
-            print("========================================================")
-            print(f"{'Candidato / Opção':<22} | {'Votos Absolutos':<15} | {'%'}")
-            print("-" * 56)
-            
-            for col in df_gov.columns:
-                if col.endswith('_QT_VOTOS_TOT_ACUMULADO'):
-                    nome_cand = col.replace('_QT_VOTOS_TOT_ACUMULADO', '').replace('_', ' ').title()
-                    votos = int(ultima_linha_gov[col])
-                    
-                    if votos > 0:
-                        porcentagem = (votos / gov_validos) * 100
-                        print(f"{nome_cand:<22} | {votos:>15,.0f} | {porcentagem:.2f}% s/ Válidos".replace(",", "."))
-                        
-            print(f"{'Votos Brancos':<22} | {gov_brancos:>15,.0f} | {(gov_brancos/gov_comp)*100:.2f}% s/ Total".replace(",", "."))
-            print(f"{'Votos Nulos':<22} | {gov_nulos:>15,.0f} | {(gov_nulos/gov_comp)*100:.2f}% s/ Total".replace(",", "."))
-            print("========================================================")
+            if nome in ['VOTO BRANCO', 'VOTO NULO']:
+                pct = (votos / gov_comparecimento) * 100
+                tipo = "s/ Total"
+            else:
+                pct = (votos / gov_validos) * 100
+                tipo = "s/ Válidos"
+                
+            print(f"{nome:<22} | {votos:>15,.0f} | {pct:.2f}% {tipo}".replace(",", "."))
+        print("========================================================")
+
+    else:
+        print("Não foi possível localizar os links de Votação Nominal ou Detalhe da Apuração na API.")
 
 except Exception as e:
     print(f"\nOcorreu um erro no processamento geral: {e}")
