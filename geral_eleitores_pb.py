@@ -352,6 +352,33 @@ try:
         df_consolidado.to_csv(consolidado_file, sep=';', index=False)
         print(f"-> [Sucesso] Resultados por município salvos com sucesso em '{consolidado_file}'")
 
+        # Calcular e salvar perfil de escolaridade por candidato em nível municipal (Presidente e Governador)
+        print("   -> Calculando perfil estimado de escolaridade por candidato para cada município...")
+        
+        # Presidente
+        df_merged_pres_all = pd.merge(df_votos_all_pres, df_prof_frac, on=['CD_MUNICIPIO', 'NR_ZONA'])
+        df_merged_pres_all['ESTIMATED_VOTES'] = df_merged_pres_all['QT_VOTOS_NOMINAIS'] * df_merged_pres_all['FRACTION']
+        df_cand_edu_pres_all = df_merged_pres_all.groupby(['CD_MUNICIPIO', 'NM_URNA_CANDIDATO', 'DS_GRAU_ESCOLARIDADE'])['ESTIMATED_VOTES'].sum().reset_index()
+        df_cand_total_pres_all = df_merged_pres_all.groupby(['CD_MUNICIPIO', 'NM_URNA_CANDIDATO'])['ESTIMATED_VOTES'].sum().reset_index(name='TOTAL_ESTIMATED')
+        df_result_pres_all = pd.merge(df_cand_edu_pres_all, df_cand_total_pres_all, on=['CD_MUNICIPIO', 'NM_URNA_CANDIDATO'])
+        df_result_pres_all['PCT'] = (df_result_pres_all['ESTIMATED_VOTES'] / df_result_pres_all['TOTAL_ESTIMATED']) * 100
+        
+        pres_edu_mun_file = 'resultado_presidente_escolaridade_municipios_pb_2022.csv'
+        df_result_pres_all.to_csv(pres_edu_mun_file, sep=';', index=False)
+        
+        # Governador
+        df_merged_gov_all = pd.merge(df_votos_all_gov, df_prof_frac, on=['CD_MUNICIPIO', 'NR_ZONA'])
+        df_merged_gov_all['ESTIMATED_VOTES'] = df_merged_gov_all['QT_VOTOS_NOMINAIS'] * df_merged_gov_all['FRACTION']
+        df_cand_edu_gov_all = df_merged_gov_all.groupby(['CD_MUNICIPIO', 'NM_URNA_CANDIDATO', 'DS_GRAU_ESCOLARIDADE'])['ESTIMATED_VOTES'].sum().reset_index()
+        df_cand_total_gov_all = df_merged_gov_all.groupby(['CD_MUNICIPIO', 'NM_URNA_CANDIDATO'])['ESTIMATED_VOTES'].sum().reset_index(name='TOTAL_ESTIMATED')
+        df_result_gov_all = pd.merge(df_cand_edu_gov_all, df_cand_total_gov_all, on=['CD_MUNICIPIO', 'NM_URNA_CANDIDATO'])
+        df_result_gov_all['PCT'] = (df_result_gov_all['ESTIMATED_VOTES'] / df_result_gov_all['TOTAL_ESTIMATED']) * 100
+        
+        gov_edu_mun_file = 'resultado_governador_escolaridade_municipios_pb_2022.csv'
+        df_result_gov_all.to_csv(gov_edu_mun_file, sep=';', index=False)
+        print(f"-> [Sucesso] Perfis de escolaridade por candidato em nível municipal salvos.")
+
+
         # 6. Busca de cidade específica (por argumento ou busca interativa)
         import sys
         

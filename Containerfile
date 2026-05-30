@@ -2,8 +2,9 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Instalar dependências necessárias para a Web App, IA e scripts de análise
-RUN pip install --no-cache-dir pandas requests openai fastapi uvicorn
+# Instalar dependências necessárias para a Web App, IA, testes e scripts de análise
+RUN pip install --no-cache-dir pandas requests openai fastapi uvicorn pytest
+
 
 COPY . .
 

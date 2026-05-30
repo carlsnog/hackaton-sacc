@@ -19,8 +19,10 @@ fi
 echo "🚀 [Podman] Executando o script '$SCRIPT_TO_RUN' no container isolado..."
 echo "------------------------------------------------------------------------"
 
-# Executar o container mapeando a pasta atual e passando variáveis de ambiente
+# Executar o container mapeando a pasta atual, expondo a porta 8000 e passando variáveis de ambiente
 podman run --rm -it \
   -v "$(pwd):/app:Z" \
+  -p 8000:8000 \
   -e OPENAI_API_KEY="$OPENAI_API_KEY" \
   "$IMAGE_NAME" python3 "$SCRIPT_TO_RUN" "$@"
+
