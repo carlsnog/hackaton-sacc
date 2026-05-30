@@ -25,7 +25,10 @@ class Assistant:
         if result.get("kind") in ("refusal", "help"):
             result["llm"] = False
             return result
-        prompt_key = "enrichment_municipality" if result["kind"] == "municipality_tool" else "enrichment_general"
+        prompt_key = {
+            "municipality_tool": "enrichment_municipality",
+            "compare_tool": "enrichment_compare",
+        }.get(result["kind"], "enrichment_general")
         system_prompt = self.prompt(prompt_key)
         data = result.get("data", {})
         text = self.llm.enrich(system_prompt, data)
@@ -68,6 +71,18 @@ class Assistant:
                 "answer": f"Lista ordenada por {metric}, eleição 2022, turno 1, renda 2022:\n" + "\n".join(lines),
             })
         municipalities = self.repository.list_municipalities({"page_size": 100})["items"]
+        if any(term in lowered for term in ("compare", "comparar", "diferença", "diferenca", " vs ", " x ")):
+            matched = []
+            for item in municipalities:
+                if normalize_name(item["municipio"]) in normalized:
+                    matched.append(self.repository.municipality(item["cod_ibge_municipio"], {}))
+            if len(matched) >= 2:
+                return self._enrich({
+                    "kind": "compare_tool",
+                    "tool": "GET /api/v1/municipios/{cod_ibge} (multi)",
+                    "data": matched,
+                    "answer": f"Dados de {', '.join(m['municipio'] for m in matched)}.",
+                })
         for item in municipalities:
             if normalize_name(item["municipio"]) in normalized:
                 detail = self.repository.municipality(item["cod_ibge_municipio"], {})

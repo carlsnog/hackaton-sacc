@@ -3,10 +3,27 @@ from __future__ import annotations
 import json
 import logging
 import os
+from pathlib import Path
 from urllib import request as urllib_request
 
 
 logger = logging.getLogger(__name__)
+
+
+def _ensure_env() -> None:
+    env_path = Path(__file__).resolve().parents[1] / ".env"
+    if not env_path.is_file():
+        return
+    for line in env_path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key, value = key.strip(), value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in ('"', "'"):
+            value = value[1:-1]
+        if key not in os.environ:
+            os.environ[key] = value
 
 
 class LLMProvider:
@@ -21,12 +38,14 @@ class DisabledProvider(LLMProvider):
 
 class OpenAIProvider(LLMProvider):
     def __init__(self, config: dict):
+        _ensure_env()
         self.base_url = (
             os.getenv(config["base_url_env"], "").rstrip("/")
             or "https://api.openai.com/v1"
         )
         self.api_key = os.getenv(config["api_key_env"]) or ""
         self.model = os.getenv(config["model_env"]) or "gpt-4o-mini"
+        self.temperature = config.get("temperature", 0.3)
 
     def enrich(self, system_prompt: str, data: dict) -> str | None:
         if not self.api_key:
@@ -42,7 +61,7 @@ class OpenAIProvider(LLMProvider):
                     "content": json.dumps(data, ensure_ascii=False, indent=2),
                 },
             ],
-            "temperature": 0.3,
+            "temperature": self.temperature,
         }
 
         body = json.dumps(payload).encode("utf-8")

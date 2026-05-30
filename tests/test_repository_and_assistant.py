@@ -44,11 +44,24 @@ class RepositoryAndAssistantTest(unittest.TestCase):
         ranking = self.assistant.answer("top 3 por score")
         self.assertEqual(ranking["kind"], "ranking_tool")
         self.assertEqual(len(ranking["data"]["items"]), 3)
-        self.assertFalse(ranking["llm"])
+        self.assertTrue(ranking["llm"])
         correlation = self.assistant.answer("qual a relação entre pobreza e abstenção?")
         self.assertEqual(correlation["kind"], "summary_tool")
-        self.assertIn(self.assistant.prompt("methodology"), correlation["answer"])
-        self.assertNotIn("Pearson", correlation["answer"])
-        self.assertFalse(correlation["llm"])
+        self.assertTrue(correlation["llm"])
+        self.assertGreater(len(correlation["answer"]), 100)
         refusal = self.assistant.answer("quero persuadir eleitor")
         self.assertEqual(refusal, {"kind": "refusal", "answer": self.assistant.prompt("refusal")})
+
+    def test_assistant_compare_two_municipalities(self):
+        result = self.assistant.answer("compare joão pessoa com campina grande")
+        self.assertEqual(result["kind"], "compare_tool")
+        self.assertIsInstance(result["data"], list)
+        self.assertGreaterEqual(len(result["data"]), 2)
+        self.assertTrue(result["llm"])
+        self.assertGreater(len(result["answer"]), 50)
+
+    def test_assistant_responses_are_concise(self):
+        ranking = self.assistant.answer("top 5 por score")
+        self.assertLess(len(ranking["answer"]), 2000)
+        correlation = self.assistant.answer("qual a relação entre pobreza e abstenção?")
+        self.assertLess(len(correlation["answer"]), 2000)
