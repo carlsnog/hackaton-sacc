@@ -1,17 +1,22 @@
 {
-  "provider": "disabled",
+  "provider": "openai",
   "providers": {
     "openai_compatible": {
       "base_url_env": "LLM_BASE_URL",
       "api_key_env": "LLM_API_KEY",
-      "model_env": "LLM_MODEL"
+      "model_env": "LLM_MODEL",
+      "temperature": 0.3
     }
   },
   "prompts": {
     "system": "ai/prompts/system.txt",
     "methodology": "ai/prompts/methodology.txt",
     "refusal": "ai/prompts/refusal.txt",
-    "help": "ai/prompts/help.txt"
+    "help": "ai/prompts/help.txt",
+    "enrichment": "ai/prompts/enrichment.txt",
+    "enrichment_general": "ai/prompts/enrichment_general.txt",
+    "enrichment_municipality": "ai/prompts/enrichment_municipality.txt",
+    "enrichment_compare": "ai/prompts/enrichment_compare.txt"
   },
   "guardrails": {
     "blocked_terms": [
