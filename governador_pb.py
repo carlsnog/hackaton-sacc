@@ -21,7 +21,6 @@ try:
     url_zip = None
     url_zip_detalhe = None
     
-    # Procura pelos arquivos corretos de Votação Nominal e Detalhe da Apuração
     for r in recursos:
         nome_recurso = r.get('name', '').lower()
         url_link = r.get('url', '').lower()
@@ -31,7 +30,6 @@ try:
             url_zip_detalhe = r['url']
 
     if url_zip and url_zip_detalhe:
-        # --- PARTE A: CARREGAMENTO DOS VOTOS NOMINAIS ---
         zip_local = "votacao_nominal_2022.zip"
         if os.path.exists(zip_local):
             print("2a. Carregando o arquivo compactado de Votação Nominal do cache local...")
@@ -45,7 +43,6 @@ try:
                 lf.write(conteudo_zip)
             print("-> [Sucesso] Arquivo de Votação Nominal salvo em cache local.")
             
-        # --- PARTE B: CARREGAMENTO DO DETALHE DA APURAÇÃO ---
         zip_local_detalhe = "detalhe_votacao_munzona_2022.zip"
         if os.path.exists(zip_local_detalhe):
             print("2b. Carregando o arquivo de Detalhe da Apuração do cache local...")
@@ -59,7 +56,6 @@ try:
                 lf.write(conteudo_zip_detalhe)
             print("-> [Sucesso] Arquivo de Detalhe da Apuração salvo em cache local.")
 
-        # --- PARTE C: PROCESSAMENTO DOS VOTOS DOS CANDIDATOS ---
         with zipfile.ZipFile(io.BytesIO(conteudo_zip)) as z:
             arquivos_internos = z.namelist()
             arq_pb = [arq for arq in arquivos_internos if 'PB.csv' in arq.upper() or '_PB' in arq.upper()]
@@ -76,14 +72,12 @@ try:
                     df['DS_CARGO'] = df['DS_CARGO'].str.strip()
                     df['NM_URNA_CANDIDATO'] = df['NM_URNA_CANDIDATO'].str.strip()
                     
-                    # Filtra apenas 1º turno e cargo de Governador
                     df_filtrado = df[(df['NR_TURNO'] == 1) & (df['DS_CARGO'].str.lower() == 'governador')]
                     placar_cands = df_filtrado.groupby('NM_URNA_CANDIDATO')['QT_VOTOS_NOMINAIS'].sum().reset_index()
                     placar_cands.columns = ['NM_VOTAVEL', 'QT_VOTOS']
             else:
                 raise FileNotFoundError("Não encontramos o arquivo da PB dentro do ZIP de Votação Nominal.")
 
-        # --- PARTE D: PROCESSAMENTO DE PARTICIPAÇÃO, BRANCOS E NULOS ---
         with zipfile.ZipFile(io.BytesIO(conteudo_zip_detalhe)) as z_det:
             arquivos_internos_det = z_det.namelist()
             arq_pb_det = [arq for arq in arquivos_internos_det if 'PB.csv' in arq.upper() or '_PB' in arq.upper()]
@@ -99,7 +93,6 @@ try:
                     df_det.columns = df_det.columns.str.strip()
                     df_det['DS_CARGO'] = df_det['DS_CARGO'].str.strip()
                     
-                    # Filtra apenas 1º turno e cargo de Governador
                     df_det_filtrado = df_det[(df_det['NR_TURNO'] == 1) & (df_det['DS_CARGO'].str.lower() == 'governador')]
                     
                     votos_aptos = df_det_filtrado['QT_APTOS'].sum()
@@ -110,16 +103,12 @@ try:
             else:
                 raise FileNotFoundError("Não encontramos o arquivo da PB dentro do ZIP de Detalhe da Apuração.")
 
-        # --- PARTE E: UNIÃO E APRESENTAÇÃO DOS RESULTADOS ---
-        # Cria registros de Brancos e Nulos
         df_brancos = pd.DataFrame([{'NM_VOTAVEL': 'VOTO BRANCO', 'QT_VOTOS': votos_brancos}])
         df_nulos = pd.DataFrame([{'NM_VOTAVEL': 'VOTO NULO', 'QT_VOTOS': votos_nulos}])
         
-        # Consolida a tabela final
         placar = pd.concat([placar_cands, df_brancos, df_nulos], ignore_index=True)
         placar = placar.sort_values(by='QT_VOTOS', ascending=False).reset_index(drop=True)
         
-        # Print do Bloco de Participação e Abstenção
         print("\n========================================================")
         print("     PARTICIPAÇÃO E ABSTENÇÃO - GOVERNADOR (PARAÍBA)    ")
         print("========================================================")
@@ -145,7 +134,6 @@ try:
             nome = linha['NM_VOTAVEL']
             votos = linha['QT_VOTOS']
             
-            # Regra da porcentagem: candidatos sobre válidos, brancos/nulos sobre o total
             if nome in ['VOTO BRANCO', 'VOTO NULO']:
                 pct = (votos / total_votos_apurados) * 100
                 tipo = "s/ Total"
@@ -157,7 +145,6 @@ try:
         
         print("========================================================")
         
-        # Salva o arquivo final estruturado no seu repositório do Hackathon
         placar.to_csv("resultado_governador_pb_2022.csv", index=False, sep=";")
         print("\nArquivo 'resultado_governador_pb_2022.csv' gerado com sucesso!")
         

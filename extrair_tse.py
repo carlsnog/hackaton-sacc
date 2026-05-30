@@ -21,7 +21,6 @@ try:
     url_zip = None
     url_zip_detalhe = None
     
-    # Procura pelos arquivos corretos de Votação Nominal e Detalhe da Apuração
     for r in recursos:
         nome_recurso = r.get('name', '').lower()
         url_link = r.get('url', '').lower()
@@ -31,7 +30,6 @@ try:
             url_zip_detalhe = r['url']
 
     if url_zip and url_zip_detalhe:
-        # --- PARTE A: CARREGAMENTO DOS VOTOS NOMINAIS (CACHE LOCAL) ---
         zip_local = "votacao_nominal_2022.zip"
         if os.path.exists(zip_local):
             print("2a. Carregando o arquivo compactado de Votação Nominal do cache local...")
@@ -45,7 +43,6 @@ try:
                 lf.write(conteudo_zip)
             print("-> [Sucesso] Votação Nominal em cache local.")
             
-        # --- PARTE B: CARREGAMENTO DO DETALHE DA APURAÇÃO (CACHE LOCAL) ---
         zip_local_detalhe = "detalhe_votacao_munzona_2022.zip"
         if os.path.exists(zip_local_detalhe):
             print("2b. Carregando o arquivo de Detalhe da Apuração do cache local...")
@@ -59,12 +56,8 @@ try:
                 lf.write(conteudo_zip_detalhe)
             print("-> [Sucesso] Detalhe da Apuração em cache local.")
 
-        # ========================================================
-        # --- PARTE 1: PRESIDENTE (PARAÍBA) ---
-        # ========================================================
         print("\n3. Processando dados da Presidência para a Paraíba (PB)...")
         
-        # 1.1 Votos Nominais
         with zipfile.ZipFile(io.BytesIO(conteudo_zip)) as z:
             arq_br = [arq for arq in z.namelist() if 'BR.csv' in arq.upper() or '_BR' in arq.upper()][0]
             with z.open(arq_br) as f:
@@ -76,7 +69,6 @@ try:
                 df_nom['NM_URNA_CANDIDATO'] = df_nom['NM_URNA_CANDIDATO'].str.strip()
                 df_nom['SG_UF'] = df_nom['SG_UF'].str.strip()
                 
-                # Filtra apenas 1º turno, cargo de Presidente e estado da Paraíba
                 df_pres_filtrado = df_nom[(df_nom['NR_TURNO'] == 1) & 
                                           (df_nom['DS_CARGO'].str.lower() == 'presidente') & 
                                           (df_nom['SG_UF'] == 'PB')]
@@ -84,7 +76,6 @@ try:
                 placar_pres_cands = df_pres_filtrado.groupby('NM_URNA_CANDIDATO')['QT_VOTOS_NOMINAIS'].sum().reset_index()
                 placar_pres_cands.columns = ['NM_VOTAVEL', 'QT_VOTOS']
 
-        # 1.2 Detalhes de comparecimento, abstenção, branco e nulo
         with zipfile.ZipFile(io.BytesIO(conteudo_zip_detalhe)) as z_det:
             arq_det_br = [arq for arq in z_det.namelist() if 'BR.csv' in arq.upper() or '_BR' in arq.upper()][0]
             with z_det.open(arq_det_br) as f_det:
@@ -105,7 +96,6 @@ try:
                 pres_brancos = df_det_filtrado['QT_VOTOS_BRANCOS'].sum()
                 pres_nulos = df_det_filtrado['QT_TOTAL_VOTOS_NULOS'].sum()
 
-        # Consolidação da tabela de Presidente na PB
         df_pres_brancos = pd.DataFrame([{'NM_VOTAVEL': 'VOTO BRANCO', 'QT_VOTOS': pres_brancos}])
         df_pres_nulos = pd.DataFrame([{'NM_VOTAVEL': 'VOTO NULO', 'QT_VOTOS': pres_nulos}])
         
@@ -142,12 +132,17 @@ try:
             print(f"{nome:<22} | {votos:>15,.0f} | {pct:.2f}% {tipo}".replace(",", "."))
         print("========================================================")
 
-        # ========================================================
-        # --- PARTE 2: GOVERNADOR (PARAÍBA) ---
-        # ========================================================
+        df = placar_pres_cands
+        ultima_linha = df_det_filtrado.sum()
+        lista_dicionarios = df.to_dict(orient='records')
+        lista_dicionarios.append({'NM_VOTAVEL': 'VOTO BRANCO', 'QT_VOTOS': int(ultima_linha['QT_VOTOS_BRANCOS'])})
+        lista_dicionarios.append({'NM_VOTAVEL': 'VOTO NULO', 'QT_VOTOS': int(ultima_linha['QT_TOTAL_VOTOS_NULOS'])})
+        lista_dicionarios = sorted(lista_dicionarios, key=lambda x: x['QT_VOTOS'], reverse=True)
+        df_final = pd.DataFrame(lista_dicionarios)
+        df_final.to_csv('resultado_presidente_pb_2022.csv', sep=';', index=False)
+
         print("\n4. Processando dados de Governador para a Paraíba (PB)...")
         
-        # 2.1 Votos Nominais
         with zipfile.ZipFile(io.BytesIO(conteudo_zip)) as z:
             arq_pb = [arq for arq in z.namelist() if 'PB.csv' in arq.upper() or '_PB' in arq.upper()][0]
             with z.open(arq_pb) as f:
@@ -162,7 +157,6 @@ try:
                 placar_gov_cands = df_gov_filtrado.groupby('NM_URNA_CANDIDATO')['QT_VOTOS_NOMINAIS'].sum().reset_index()
                 placar_gov_cands.columns = ['NM_VOTAVEL', 'QT_VOTOS']
 
-        # 2.2 Detalhes de comparecimento, abstenção, branco e nulo
         with zipfile.ZipFile(io.BytesIO(conteudo_zip_detalhe)) as z_det:
             arq_pb_det = [arq for arq in z_det.namelist() if 'PB.csv' in arq.upper() or '_PB' in arq.upper()][0]
             with z_det.open(arq_pb_det) as f_det:
@@ -180,7 +174,6 @@ try:
                 gov_brancos = df_det_filtrado['QT_VOTOS_BRANCOS'].sum()
                 gov_nulos = df_det_filtrado['QT_TOTAL_VOTOS_NULOS'].sum()
 
-        # Consolidação da tabela de Governador na PB
         df_gov_brancos = pd.DataFrame([{'NM_VOTAVEL': 'VOTO BRANCO', 'QT_VOTOS': gov_brancos}])
         df_gov_nulos = pd.DataFrame([{'NM_VOTAVEL': 'VOTO NULO', 'QT_VOTOS': gov_nulos}])
         
