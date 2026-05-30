@@ -1,37 +1,38 @@
-:root { color-scheme: light; font-family: Inter, system-ui, sans-serif; background:#f4f1ea; color:#1b2b29; }
+:root { color-scheme:light; font-family:Inter,system-ui,sans-serif; background:#d7d9d3; color:#4d382c; }
 * { box-sizing:border-box; }
-body { margin:0; }
+body { background:#f3f4f1; margin:0; min-height:100vh; }
 header, main { max-width:1100px; margin:auto; padding:28px; }
 header { padding-top:54px; }
 h1 { font-size:clamp(2.2rem, 6vw, 4.8rem); line-height:.95; margin:8px 0; max-width:850px; }
 h2 { margin:4px 0 14px; }
-.eyebrow { color:#bd5b39; font-size:.75rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; }
-.notice, .panel, .card { background:#fffdf7; border:1px solid #d9d1c2; border-radius:16px; padding:18px; }
-.notice { margin-bottom:16px; color:#6c4938; }
+.eyebrow { color:#c95a2c; font-size:.75rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; }
+.notice, .panel, .card { background:#fff; border:1px solid #d7d9d3; border-radius:16px; box-shadow:0 8px 22px rgba(77,56,44,.07); padding:18px; }
+.notice { border-left:5px solid #c95a2c; margin-bottom:16px; color:#4d382c; }
 .cards { display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); margin-bottom:16px; }
-.card strong { display:block; font-size:1.65rem; margin:6px 0; }
-.card small { color:#625d54; display:block; line-height:1.4; }
+.card strong { color:#c95a2c; display:block; font-size:1.65rem; margin:6px 0; }
+.card small { color:#4d382c; display:block; line-height:1.4; opacity:.82; }
 .panel { margin:16px 0; overflow:auto; }
 .toolbar, form { display:flex; gap:12px; justify-content:space-between; align-items:center; }
-a, button { background:#1f665b; color:white; border:0; border-radius:9px; padding:10px 14px; text-decoration:none; font-weight:700; }
-input { width:100%; padding:12px; border:1px solid #bfb5a4; border-radius:9px; }
+a, button { background:#c95a2c; color:white; border:0; border-radius:9px; padding:10px 14px; text-decoration:none; font-weight:700; }
+a:hover, button:hover { background:#4d382c; }
+input { width:100%; padding:12px; border:1px solid #d7d9d3; border-radius:9px; }
 table { border-collapse:collapse; width:100%; }
-th, td { border-bottom:1px solid #e4ddd2; padding:10px; text-align:left; }
-th { background:#f8f4eb; }
-.municipality-table-scroll { border:1px solid #e4ddd2; border-radius:10px; max-height:480px; overflow:auto; }
+th, td { border-bottom:1px solid #d7d9d3; padding:10px; text-align:left; }
+th { background:#eef0ec; }
+.municipality-table-scroll { border:1px solid #d7d9d3; border-radius:10px; max-height:480px; overflow:auto; }
 .municipality-table-scroll th { position:sticky; top:0; z-index:1; }
-button.sort { background:transparent; color:#1b2b29; cursor:pointer; padding:0; text-align:left; }
+button.sort { background:transparent; color:#4d382c; cursor:pointer; padding:0; text-align:left; }
 button.sort[data-direction="asc"]::after { content:" ↑"; }
 button.sort[data-direction="desc"]::after { content:" ↓"; }
-svg { min-width:620px; background:#fbf8f1; border-radius:12px; }
-#scatter circle { fill:#bd5b39; opacity:.78; }
-.axis { stroke:#736d63; }
-.grid { stroke:#e5ded2; stroke-width:1; }
-.label { fill:#4b4a45; font-size:11px; }
-pre { white-space:pre-wrap; background:#f4f1ea; padding:14px; border-radius:9px; }
-.map-container { align-items:center; background:#fbf8f1; border-radius:12px; display:flex; justify-content:center; min-height:240px; position:relative; }
+svg { min-width:620px; background:#f8f8f6; border-radius:12px; }
+#scatter circle, #electoral-scatter circle { fill:#c95a2c; opacity:.72; }
+.axis { stroke:#4d382c; }
+.grid { stroke:#d7d9d3; stroke-width:1; }
+.label { fill:#4d382c; font-size:11px; }
+pre { white-space:pre-wrap; background:#d7d9d3; padding:14px; border-radius:9px; }
+.map-container { align-items:center; background:#f8f8f6; border-radius:12px; display:flex; justify-content:center; min-height:240px; position:relative; }
 .map-container svg:empty { display:none; }
-.empty-state { color:#6c4938; line-height:1.5; margin:0; max-width:620px; padding:38px; text-align:center; }
-.municipality { stroke:#fffdf7; stroke-width:.45; }
+.empty-state { color:#4d382c; line-height:1.5; margin:0; max-width:620px; padding:38px; text-align:center; }
+.municipality { stroke:#fff; stroke-width:.45; }
 .heat-legend { align-items:center; display:flex; gap:10px; justify-content:center; margin-top:12px; }
-.heat-legend i { background:linear-gradient(90deg,hsl(38 72% 78%),hsl(8 72% 43%)); border-radius:8px; display:block; height:12px; width:220px; }
+.heat-legend i { background:linear-gradient(90deg,#fbe2d8,#edb29b,#c95a2c,#782f1a); border-radius:8px; display:block; height:12px; width:220px; }

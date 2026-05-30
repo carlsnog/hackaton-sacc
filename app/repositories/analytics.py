@@ -10,6 +10,7 @@ from pipeline.core import load_json, project_root
 
 SORT_FIELDS = {
     "municipio": "municipio",
+    "total_aptos": "total_aptos",
     "taxa_abstencao_pct": "taxa_abstencao_pct",
     "renda_pc_mediana": "renda_pc_mediana",
     "renda_pc_media": "renda_pc_media",
@@ -22,6 +23,8 @@ class AnalyticsRepository:
     def __init__(self, config: dict | None = None):
         self.config = config or load_json("config/settings.json")
         self.db_path = project_root() / self.config["database_path"]
+        if not self.db_path.is_file():
+            self.db_path = project_root() / "data" / "deploy" / "vozes_ausentes_pb.sqlite3"
 
     def connect(self) -> sqlite3.Connection:
         connection = sqlite3.connect(self.db_path)

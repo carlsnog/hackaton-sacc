@@ -35,4 +35,19 @@ make ingest
 make pipeline
 ```
 
+## Deploy na Vercel
+
+O deploy da Vercel usa uma Function Python e um snapshot SQLite somente leitura. O assistente local funciona sem chave de LLM.
+
+Atualize e valide o snapshot antes de publicar:
+
+```bash
+make pipeline
+make test
+make deploy-snapshot
+vercel --prod
+```
+
+O arquivo versionável `data/deploy/vozes_ausentes_pb.sqlite3` deve acompanhar o deploy. A Vercel não executa o `Containerfile`; o fluxo Podman continua sendo usado para ingestão, pipeline e testes locais.
+
 Comece a leitura técnica por [`docs/llm-wiki/00-index.md`](docs/llm-wiki/00-index.md). A matriz de entregas e bloqueios locais está em [`docs/llm-wiki/09-requirements-traceability.md`](docs/llm-wiki/09-requirements-traceability.md).

@@ -38,6 +38,10 @@ class RepositoryAndAssistantTest(unittest.TestCase):
     def test_export_is_not_paginated(self):
         self.assertEqual(len(self.repository.export_municipalities({})), 223)
 
+    def test_municipalities_can_be_sorted_by_eligible_voters(self):
+        items = self.repository.list_municipalities({"sort": "total_aptos", "order": "desc"})["items"]
+        self.assertGreaterEqual(items[0]["total_aptos"], items[-1]["total_aptos"])
+
     def test_status_keeps_healthcheck_compact(self):
         status = self.repository.pipeline_status()
         self.assertEqual(status["status"], "success")

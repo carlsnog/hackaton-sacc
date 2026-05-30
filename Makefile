@@ -1,4 +1,4 @@
-.PHONY: image ingest pipeline serve test
+.PHONY: image ingest pipeline deploy-snapshot serve test
 
 IMAGE := vozes-ausentes-pb:dev
 
@@ -10,6 +10,9 @@ ingest: image
 
 pipeline: image
 	podman run --rm -v "$(CURDIR):/app:Z" $(IMAGE) python -m pipeline.run_pipeline
+
+deploy-snapshot: image
+	podman run --rm -v "$(CURDIR):/app:Z" $(IMAGE) python -m pipeline.publish_vercel_snapshot
 
 serve: image
 	podman run --rm -p 8000:8000 $(IMAGE)
