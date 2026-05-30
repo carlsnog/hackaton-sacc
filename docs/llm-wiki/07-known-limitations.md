@@ -3,7 +3,7 @@
 ## Dados ausentes
 
 - Não há crosswalk oficial TSE-IBGE local. A ponte atual é um fallback auditável por nome normalizado para as 10 cidades com renda.
-- Não há malha GeoJSON ou TopoJSON. O componente de mapa de calor está pronto, mas exibe um fallback até que `data/geo/municipios-pb.geojson` seja fornecido.
+- A malha municipal possui os 223 polígonos, mas somente 10 municípios possuem dados socioeconômicos cruzados. O mapa colore esses 10 territórios e mantém os demais em cinza.
 - Não há dados eleitorais por seção. Deduplicação e auditoria por zona/seção não são executáveis com o CSV atual.
 - Não há cobertura socioeconômica para 213 municípios. Rankings e correlações cruzadas representam somente 10 municípios.
 - As faixas de renda são de 2010, enquanto renda média/mediana e eleitoral são de 2022.

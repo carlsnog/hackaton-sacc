@@ -11,12 +11,13 @@ function svgText(x, y, text, anchor = "middle") {
 function renderScatter(items) {
   const svg = document.querySelector("#scatter");
   const valid = items.filter(item => item.renda_pc_mediana != null && item.taxa_abstencao_pct != null);
+  const minX = 550;
   const maxX = Math.ceil(Math.max(...valid.map(item => item.renda_pc_mediana)) / 200) * 200;
   const maxY = Math.ceil(Math.max(...valid.map(item => item.taxa_abstencao_pct)) / 5) * 5;
   const left = 68, right = 690, top = 24, bottom = 315;
-  const x = value => left + value / maxX * (right - left);
+  const x = value => left + (value - minX) / (maxX - minX) * (right - left);
   const y = value => bottom - value / maxY * (bottom - top);
-  const xTicks = Array.from({ length: 6 }, (_, index) => index * maxX / 5);
+  const xTicks = Array.from({ length: 6 }, (_, index) => minX + index * (maxX - minX) / 5);
   const yTicks = Array.from({ length: maxY / 5 + 1 }, (_, index) => index * 5);
   const gridX = xTicks.map(value => `<line class="grid" x1="${x(value)}" y1="${top}" x2="${x(value)}" y2="${bottom}"/>${svgText(x(value), 334, integer.format(value))}`).join("");
   const gridY = yTicks.map(value => `<line class="grid" x1="${left}" y1="${y(value)}" x2="${right}" y2="${y(value)}"/>${svgText(58, y(value) + 4, `${value}%`, "end")}`).join("");
@@ -45,8 +46,11 @@ function renderMap(geojson, items) {
   if (!points.length) throw new Error("GeoJSON municipal vazio");
   const xs = points.map(point => point[0]), ys = points.map(point => point[1]);
   const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
-  const scale = Math.min(670 / (maxX - minX), 410 / (maxY - minY));
-  const project = point => [25 + (point[0] - minX) * scale, 435 - (point[1] - minY) * scale];
+  const availableWidth = 650, availableHeight = 380;
+  const scale = Math.min(availableWidth / (maxX - minX), availableHeight / (maxY - minY));
+  const renderedWidth = (maxX - minX) * scale, renderedHeight = (maxY - minY) * scale;
+  const offsetX = (720 - renderedWidth) / 2, offsetY = (460 - renderedHeight) / 2;
+  const project = point => [offsetX + (point[0] - minX) * scale, offsetY + renderedHeight - (point[1] - minY) * scale];
   const byCode = Object.fromEntries(items.map(item => [item.cod_ibge_municipio, item]));
   const rates = items.map(item => item.taxa_abstencao_pct);
   const minRate = Math.min(...rates), maxRate = Math.max(...rates);
@@ -61,7 +65,7 @@ function renderMap(geojson, items) {
       const [x, y] = project(point);
       return `${index ? "L" : "M"}${x.toFixed(2)},${y.toFixed(2)}`;
     }).join(" ") + " Z").join(" ");
-    const tooltip = item ? `${item.municipio}: ${fmt.format(item.taxa_abstencao_pct)}% de eleitores ausentes` : "Município sem indicador socioeconômico cruzado";
+    const tooltip = item ? `${item.municipio}: ${fmt.format(item.taxa_abstencao_pct)}% de eleitores ausentes` : `${feature.properties?.name || "Município"}: sem indicador socioeconômico cruzado`;
     return `<path class="municipality" d="${path}" fill="${color(item?.taxa_abstencao_pct)}"><title>${tooltip}</title></path>`;
   }).join("");
   fallback.textContent = "";
@@ -70,9 +74,9 @@ function renderMap(geojson, items) {
 
 async function loadMap(items) {
   try {
-    const response = await fetch("/api/v1/geojson");
-    if (!response.ok) throw new Error("malha indisponível");
-    renderMap(await response.json(), items);
+    const geoResponse = await fetch("/api/v1/geojson");
+    if (!geoResponse.ok) throw new Error("malha indisponível");
+    renderMap(await geoResponse.json(), items);
   } catch {
     document.querySelector("#heat-map").innerHTML = "";
     document.querySelector("#map-fallback").textContent =
@@ -108,7 +112,7 @@ async function load() {
   document.querySelector("#cards").innerHTML = [
     ["Municípios analisados", summary.municipios_validos, "Cidades com dados compatíveis para comparar ausência eleitoral e renda."],
     ["Eleitores ausentes", `${fmt.format(summary.taxa_abstencao_pct)}%`, "Percentual de pessoas aptas que não compareceram às urnas no recorte analisado."],
-    ["Eleitores aptos", integer.format(summary.total_aptos), "Total de pessoas habilitadas a votar nos municípios analisados."],
+    ["Eleitores aptos", integer.format(summary.total_aptos), `${fmt.format(summary.abrangencia_eleitores_paraiba_pct)}% dos ${integer.format(summary.eleitores_aptos_paraiba)} eleitores aptos da Paraíba estão representados nos municípios analisados.`],
     ["Ausências registradas", integer.format(summary.total_abstencoes), "Quantidade de eleitores que não compareceram às urnas."]
   ].map(([label, value, description]) => `<article class="card"><span>${label}</span><strong>${value}</strong><small>${description}</small></article>`).join("");
   document.querySelector("#income-groups").innerHTML = groups.map(item =>

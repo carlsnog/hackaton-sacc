@@ -25,6 +25,6 @@ O MVP usa SQLite e a biblioteca padrão do Python para funcionar sem instalaçã
 
 ## Cobertura local
 
-O eleitoral contém 223 municípios PB, já agregados. A renda municipal contém 10 municípios; portanto, o mart cruzado e as análises renda-abstenção têm cobertura parcial. Não foi fornecida malha GeoJSON. O dashboard já possui o componente de mapa de calor e o habilita automaticamente quando `data/geo/municipios-pb.geojson` é adicionado.
+O eleitoral contém 223 municípios PB, já agregados. A renda municipal contém 10 municípios; portanto, o mart cruzado e as análises renda-abstenção têm cobertura parcial. O dashboard usa `data/geo/geojs-25-mun.json`, com os polígonos dos 223 municípios, para exibir o mapa de calor. Os municípios sem renda cruzada permanecem em cinza.
 
 Comece a leitura técnica por [`docs/llm-wiki/00-index.md`](docs/llm-wiki/00-index.md). A matriz de entregas e bloqueios locais está em [`docs/llm-wiki/09-requirements-traceability.md`](docs/llm-wiki/09-requirements-traceability.md).

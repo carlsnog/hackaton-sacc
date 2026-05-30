@@ -10,6 +10,10 @@
     "turno": 1,
     "ano_renda": 2022
   },
+  "analysis_context": {
+    "eleitores_aptos_paraiba": 3225826,
+    "eleitores_aptos_paraiba_note": "Total estadual de eleitores aptos informado para contextualizar a abrangencia do recorte analisado."
+  },
   "score": {
     "version": "local-mvp-v1",
     "weights": {

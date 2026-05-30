@@ -121,6 +121,7 @@ class AnalyticsRepository:
             xs = [row["renda_pc_mediana"] for row in rows if row["renda_pc_mediana"] is not None]
             ys = [row["taxa_abstencao_pct"] for row in rows if row["renda_pc_mediana"] is not None]
             aptos, abstencoes = sum(row["total_aptos"] for row in rows), sum(row["total_abstencoes"] for row in rows)
+            aptos_paraiba = self.config["analysis_context"]["eleitores_aptos_paraiba"]
             return {
                 "snapshot_id": rows[0]["snapshot_id"],
                 "ano_eleicao": rows[0]["ano_eleicao"],
@@ -130,6 +131,8 @@ class AnalyticsRepository:
                 "municipios_validos": len(rows),
                 "cobertura": "parcial: somente municipios com renda na fonte local",
                 "total_aptos": aptos,
+                "eleitores_aptos_paraiba": aptos_paraiba,
+                "abrangencia_eleitores_paraiba_pct": 100 * aptos / aptos_paraiba if aptos_paraiba else None,
                 "total_abstencoes": abstencoes,
                 "taxa_abstencao_pct": 100 * abstencoes / aptos if aptos else None,
                 "renda_pc_mediana_dos_municipios": statistics.median(xs) if xs else None,

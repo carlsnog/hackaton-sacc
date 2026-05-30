@@ -26,7 +26,7 @@
 | Dados eleitorais por seção | criar fato de seção e agregador antes de `load_electoral` |
 | PostgreSQL | nova implementação da interface prática de `AnalyticsRepository` |
 | Provedor LLM | adapter separado lendo somente nomes de ambiente de `config/ai.json` |
-| Mapa | adicionar `data/geo/municipios-pb.geojson`; o componente frontend já associa por código IBGE |
+| Mapa | manter `data/geo/geojs-25-mun.json`; o frontend associa `properties.id` ao código IBGE |
 
 ## Artefatos reconstruíveis
 

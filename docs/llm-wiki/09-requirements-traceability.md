@@ -16,7 +16,7 @@
 
 | Requisito | Motivo | Comportamento atual |
 | --- | --- | --- |
-| Mapa de calor | `data/geo` não contém GeoJSON ou TopoJSON | Componente pronto; exibe fallback até receber `data/geo/municipios-pb.geojson` |
+| Cobertura completa do mapa | Malha possui 223 polígonos, mas renda local cobre somente 10 municípios | Mapa renderiza todos os territórios e mantém em cinza os municípios sem cruzamento socioeconômico |
 | Crosswalk oficial | Arquivo TSE-IBGE não está disponível localmente | Fallback por nome normalizado somente para construir ponte auditável |
 | Auditoria por seção | Eleitoral local já está agregado por município | Pipeline valida unicidade municipal e documenta indisponibilidade de seção |
 | Cobertura de 223 municípios no mart | SIDRA local possui somente 10 municípios | Mart parcial, aviso de cobertura e lista de ausentes |

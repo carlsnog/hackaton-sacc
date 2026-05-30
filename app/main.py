@@ -106,7 +106,7 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def send_geojson(self):
-        target = project_root() / "data" / "geo" / "municipios-pb.geojson"
+        target = project_root() / "data" / "geo" / "geojs-25-mun.json"
         if not target.is_file():
             return self.send_json({"error": "Malha municipal local indisponivel"}, 404)
         body = target.read_bytes()

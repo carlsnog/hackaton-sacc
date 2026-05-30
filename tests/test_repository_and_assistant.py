@@ -16,6 +16,8 @@ class RepositoryAndAssistantTest(unittest.TestCase):
         summary = self.repository.summary({})
         self.assertEqual(summary["municipios_validos"], 10)
         self.assertAlmostEqual(summary["taxa_abstencao_pct"], 14.855234529554938)
+        self.assertEqual(summary["eleitores_aptos_paraiba"], 3225826)
+        self.assertAlmostEqual(summary["abrangencia_eleitores_paraiba_pct"], 81.64017526053792)
         self.assertEqual(len(summary["sources"]), 2)
 
     def test_detail_exposes_score_components_and_faixas(self):

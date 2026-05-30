@@ -22,7 +22,7 @@ button.sort { background:transparent; color:#1b2b29; cursor:pointer; padding:0; 
 button.sort[data-direction="asc"]::after { content:" ↑"; }
 button.sort[data-direction="desc"]::after { content:" ↓"; }
 svg { min-width:620px; background:#fbf8f1; border-radius:12px; }
-circle { fill:#bd5b39; opacity:.78; }
+#scatter circle { fill:#bd5b39; opacity:.78; }
 .axis { stroke:#736d63; }
 .grid { stroke:#e5ded2; stroke-width:1; }
 .label { fill:#4b4a45; font-size:11px; }
