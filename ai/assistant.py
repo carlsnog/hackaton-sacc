@@ -128,8 +128,15 @@ class Assistant:
         """
         normalized = normalize_name(question)
         lowered = question.lower()
-        
+
+        # 0. Verificar termos bloqueados (Guardrails)
+        if any(term in lowered for term in self.config["guardrails"]["blocked_terms"]):
+            logger.info(json.dumps({"event": "assistant_refusal", "reason": "neutrality_guardrail"}))
+            return {"kind": "refusal", "answer": self.prompt("refusal")}
+
+
         # 1. Carregar os bancos de dados CSV
+
         try:
             df_dem = pd.read_csv('perfil_demografico_municipios_pb_2022.csv', sep=';')
             df_votos = pd.read_csv('resultado_consolidado_municipios_pb_2022.csv', sep=';')
@@ -264,8 +271,38 @@ class Assistant:
                 "answer": resposta
             }
 
+        # 3.1. Caso seja uma pergunta de correlação/relação com pobreza
+        if any(term in lowered for term in ("correlação", "correlacao", "relação", "relacao", "pobreza")):
+            summary = self.repository.summary({})
+            return {
+                "kind": "summary_tool",
+                "tool": "GET /api/v1/resumo",
+                "data": summary,
+                "answer": (
+                    f"No recorte de {summary['ano_eleicao']}, turno {summary['turno']}, com renda de "
+                    f"{summary['ano_referencia_renda']} e {summary['municipios_validos']} municípios analisados, "
+                    "os dados permitem observar padrões territoriais entre renda e ausência eleitoral. "
+                    f"{self.prompt('methodology')}"
+                ),
+            }
+
+        # 3.2. Caso seja uma pergunta de ranking/top
+        match = re.search(r"\btop\s*(\d+)?", lowered)
+        if match or "ranking" in lowered:
+            limit = int(match.group(1)) if match and match.group(1) else 10
+            metric = "score_vulnerabilidade" if "score" in lowered or "indice" in lowered or "índice" in lowered or "vulnerab" in lowered else "taxa_abstencao_pct"
+            ranking = self.repository.ranking({"metric": metric, "limit": limit})
+            lines = [f"{index + 1}. {item['municipio']}: {item[metric]:.2f}" for index, item in enumerate(ranking["items"])]
+            return {
+                "kind": "ranking_tool",
+                "tool": "GET /api/v1/rankings",
+                "data": ranking,
+                "answer": f"Lista ordenada por {metric}, eleição 2022, turno 1, renda 2022:\n" + "\n".join(lines),
+            }
+
         # 4. Tratamento padrão: verificar se é saudação/ajuda, senão retornar resposta de recusa padrão de fora de contexto
         is_greeting_or_help = any(w in lowered for w in ("olá", "ola", "oi", "bom dia", "boa tarde", "boa noite", "ajuda", "help", "como funciona", "como usar", "quem é você", "o que você faz"))
+
         
         if is_greeting_or_help or len(lowered.strip()) < 3:
             return {
