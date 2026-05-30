@@ -1,5 +1,5 @@
 {
-  "pipeline_version": "local-mvp-v2",
+  "pipeline_version": "local-mvp-v3",
   "database_path": "data/curated/vozes_ausentes_pb.sqlite3",
   "electoral_source": "data/abstencao_nulos_brancos_2022_pb.csv",
   "socioeconomic_source": "data/csv_SIDRA_indicadores_socio_economicos/indicadores_socioeconomicos_paraiba.csv",
@@ -15,7 +15,7 @@
     "eleitores_aptos_paraiba_note": "Total estadual de eleitores aptos informado para contextualizar a abrangencia do recorte analisado."
   },
   "score": {
-    "version": "local-mvp-v1",
+    "version": "local-mvp-v2",
     "weights": {
       "abstencao": 0.4,
       "renda_baixa": 0.35,
@@ -33,6 +33,6 @@
     "port": 8000,
     "max_ranking_limit": 100,
     "default_page_size": 20,
-    "max_page_size": 100
+    "max_page_size": 300
   }
 }

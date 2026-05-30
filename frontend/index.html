@@ -51,10 +51,12 @@
         <a href="/api/v1/export.csv">Exportar CSV</a>
       </div>
       <p>Selecione um cabeçalho para ordenar a tabela. O índice de atenção combina abstenção elevada e indicadores de menor renda para apoiar a investigação de contextos locais.</p>
-      <table>
-        <thead><tr><th><button class="sort" data-sort="municipio">Município</button></th><th><button class="sort" data-sort="taxa_abstencao_pct">Eleitores ausentes</button></th><th><button class="sort" data-sort="renda_pc_mediana">Renda mediana por pessoa</button></th><th><button class="sort" data-sort="score_vulnerabilidade">Índice de atenção</button></th></tr></thead>
-        <tbody id="ranking"></tbody>
-      </table>
+      <div class="municipality-table-scroll" role="region" aria-label="Comparação de municípios" tabindex="0">
+        <table>
+          <thead><tr><th><button class="sort" data-sort="municipio">Município</button></th><th><button class="sort" data-sort="taxa_abstencao_pct">Eleitores ausentes</button></th><th><button class="sort" data-sort="renda_pc_mediana">Renda mediana por pessoa</button></th><th><button class="sort" data-sort="score_vulnerabilidade">Índice de atenção</button></th></tr></thead>
+          <tbody id="ranking"></tbody>
+        </table>
+      </div>
     </section>
     <section class="panel">
       <div class="toolbar">

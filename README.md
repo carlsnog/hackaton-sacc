@@ -17,6 +17,7 @@ Os alvos do `Makefile` executam pipeline, testes e servidor dentro do Podman. N�
 ## Configuração
 
 - Regras do pipeline, caminhos e pesos do score: `config/settings.json`.
+- Consulta oficial SIDRA e parâmetros de ingestão: `config/sidra.json`.
 - Provedor, nomes de variáveis de ambiente e guardrails de IA: `config/ai.json`.
 - Comportamento editável do assistente: `ai/prompts/`.
 - Credenciais opcionais: variáveis descritas em `.env.example`; nenhuma chave é versionada.
@@ -25,6 +26,13 @@ O MVP usa SQLite e a biblioteca padrão do Python para funcionar sem instalaçã
 
 ## Cobertura local
 
-O eleitoral contém 223 municípios PB, já agregados. A renda municipal contém 10 municípios; portanto, o mart cruzado e as análises renda-abstenção têm cobertura parcial. O dashboard usa `data/geo/geojs-25-mun.json`, com os polígonos dos 223 municípios, para exibir o mapa de calor. Os municípios sem renda cruzada permanecem em cinza.
+O eleitoral, a renda municipal de 2022 e a malha geográfica contêm os 223 municípios da Paraíba. O dashboard usa `data/geo/geojs-25-mun.json` para exibir o mapa de calor completo.
+
+Para atualizar os indicadores socioeconômicos pela API oficial do SIDRA:
+
+```bash
+make ingest
+make pipeline
+```
 
 Comece a leitura técnica por [`docs/llm-wiki/00-index.md`](docs/llm-wiki/00-index.md). A matriz de entregas e bloqueios locais está em [`docs/llm-wiki/09-requirements-traceability.md`](docs/llm-wiki/09-requirements-traceability.md).

@@ -299,7 +299,11 @@ def run(config_path: str = "config/settings.json") -> str:
                 json.dumps(weights, ensure_ascii=False, sort_keys=True),
             ))
         connection.executemany("INSERT OR IGNORE INTO mart_municipio_eleicao VALUES (" + ",".join("?" * 28) + ")", mart_rows)
-        quality["mart"] = {"rows": len(mart_rows), "coverage": "partial", "missing_income": 223 - len(mart_rows)}
+        quality["mart"] = {
+            "rows": len(mart_rows),
+            "coverage": "complete" if len(mart_rows) == 223 else "partial",
+            "missing_income": 223 - len(mart_rows),
+        }
         add_quality(quality, "info", "MART_PUBLISHED", "Mart analitico publicado", rows=len(mart_rows), snapshot_id=snapshot_id)
         quality["status"], quality["finished_at"] = "success", now()
         connection.execute(

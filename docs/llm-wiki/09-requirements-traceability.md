@@ -16,13 +16,11 @@
 
 | Requisito | Motivo | Comportamento atual |
 | --- | --- | --- |
-| Cobertura completa do mapa | Malha possui 223 polígonos, mas renda local cobre somente 10 municípios | Mapa renderiza todos os territórios e mantém em cinza os municípios sem cruzamento socioeconômico |
 | Crosswalk oficial | Arquivo TSE-IBGE não está disponível localmente | Fallback por nome normalizado somente para construir ponte auditável |
 | Auditoria por seção | Eleitoral local já está agregado por município | Pipeline valida unicidade municipal e documenta indisponibilidade de seção |
-| Cobertura de 223 municípios no mart | SIDRA local possui somente 10 municípios | Mart parcial, aviso de cobertura e lista de ausentes |
 | LLM externo e índice vetorial | Nenhum provedor ou banco vetorial foi fornecido | Assistente determinístico e documentos RAG JSON reconstruíveis |
 | PostgreSQL | Ambiente local inicial usa biblioteca padrão | SQLite isolado por repository para substituição futura |
 
-## Não implementar sem novos arquivos locais
+## Não preencher por estimativa
 
-Não preencher as lacunas por download, estimativa ou fonte externa. Quando novos arquivos forem adicionados em `data/`, preservar os schemas canônicos e remover cada degradação com testes específicos.
+Atualizações socioeconômicas podem usar somente a API oficial SIDRA configurada. Não preencher lacunas por estimativa ou fonte não auditável. Quando novos arquivos forem adicionados em `data/`, preservar os schemas canônicos e remover cada degradação com testes específicos.

@@ -14,10 +14,11 @@ class RepositoryAndAssistantTest(unittest.TestCase):
 
     def test_summary_is_weighted_and_traceable(self):
         summary = self.repository.summary({})
-        self.assertEqual(summary["municipios_validos"], 10)
-        self.assertAlmostEqual(summary["taxa_abstencao_pct"], 14.855234529554938)
+        self.assertEqual(summary["municipios_validos"], 223)
+        self.assertAlmostEqual(summary["taxa_abstencao_pct"], 17.013058255630266)
         self.assertEqual(summary["eleitores_aptos_paraiba"], 3225826)
-        self.assertAlmostEqual(summary["abrangencia_eleitores_paraiba_pct"], 81.64017526053792)
+        self.assertEqual(summary["abrangencia_eleitores_paraiba_pct"], 100)
+        self.assertEqual(summary["abrangencia_territorial_pct"], 100)
         self.assertEqual(len(summary["sources"]), 2)
 
     def test_detail_exposes_score_components_and_faixas(self):
@@ -35,7 +36,7 @@ class RepositoryAndAssistantTest(unittest.TestCase):
         self.assertIn("taxa_abstencao_desvio_padrao", groups[0])
 
     def test_export_is_not_paginated(self):
-        self.assertEqual(len(self.repository.export_municipalities({})), 10)
+        self.assertEqual(len(self.repository.export_municipalities({})), 223)
 
     def test_status_keeps_healthcheck_compact(self):
         status = self.repository.pipeline_status()

@@ -18,6 +18,8 @@ input { width:100%; padding:12px; border:1px solid #bfb5a4; border-radius:9px; }
 table { border-collapse:collapse; width:100%; }
 th, td { border-bottom:1px solid #e4ddd2; padding:10px; text-align:left; }
 th { background:#f8f4eb; }
+.municipality-table-scroll { border:1px solid #e4ddd2; border-radius:10px; max-height:480px; overflow:auto; }
+.municipality-table-scroll th { position:sticky; top:0; z-index:1; }
 button.sort { background:transparent; color:#1b2b29; cursor:pointer; padding:0; text-align:left; }
 button.sort[data-direction="asc"]::after { content:" ↑"; }
 button.sort[data-direction="desc"]::after { content:" ↓"; }

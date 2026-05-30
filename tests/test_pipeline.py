@@ -23,8 +23,8 @@ class PipelineTest(unittest.TestCase):
     def test_preserves_complete_electoral_universe(self):
         self.assertEqual(self.count("fact_abstencao_municipio"), 223)
 
-    def test_builds_partial_local_mart(self):
-        self.assertEqual(self.count("mart_municipio_eleicao"), 10)
+    def test_builds_complete_local_mart(self):
+        self.assertEqual(self.count("mart_municipio_eleicao"), 223)
 
     def test_score_weights_sum_to_one(self):
         weights = self.config["score"]["weights"]
@@ -42,7 +42,7 @@ class PipelineTest(unittest.TestCase):
         self.assertGreaterEqual(report["income"]["faixa_percentage_sum_min"], 99.9)
         self.assertLessEqual(report["income"]["faixa_percentage_sum_max"], 100.1)
         codes = {message["code"] for message in report["messages"]}
-        self.assertIn("SOCIOECONOMIC_PARTIAL_COVERAGE", codes)
+        self.assertNotIn("SOCIOECONOMIC_PARTIAL_COVERAGE", codes)
         self.assertIn("CROSSWALK_LOCAL_NAME_FALLBACK", codes)
 
     def test_rag_document_contains_traceable_structured_context(self):
@@ -55,4 +55,4 @@ class PipelineTest(unittest.TestCase):
     def test_repeated_run_is_idempotent_for_snapshot_facts(self):
         self.assertEqual(run(), self.snapshot)
         self.assertEqual(self.count("fact_abstencao_municipio"), 223)
-        self.assertEqual(self.count("mart_municipio_eleicao"), 10)
+        self.assertEqual(self.count("mart_municipio_eleicao"), 223)

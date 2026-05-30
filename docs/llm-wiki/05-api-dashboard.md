@@ -22,6 +22,6 @@ Filtros temporais: `ano_eleicao`, `turno`, `ano_renda`, `snapshot_id`. Lista: `b
 
 ## Métricas do snapshot inicial
 
-No mart parcial: 10 municípios; 2.633.570 aptos; 391.223 abstenções; taxa ponderada `14,8552%`. Considerando o total estadual informado de 3.225.826 eleitores aptos, o recorte representa `81,64%` dos eleitores da Paraíba. Pearson (`0,1241`) e Spearman (`0,0365`) continuam disponíveis na API para auditoria, mas não são destacados na interface porque a cobertura local é parcial e os resultados não sustentam uma leitura útil para o público final.
+No mart completo: 223 municípios; taxa ponderada de abstenção `17,0131%`. Os 223 municípios abrangem `100%` do território e dos 3.225.826 eleitores aptos informados para a Paraíba. O arquivo eleitoral local preserva somas agregadas próprias para o cálculo auditável da taxa; essas somas não são exibidas como contagem de eleitores únicos.
 
-O dashboard apresenta cartões explicativos, mapa de calor, dispersão com escalas visíveis, tabela ordenável e grupos por faixa predominante. O mapa usa `data/geo/geojs-25-mun.json`, que contém polígonos para os 223 municípios. Os 10 municípios com renda cruzada são coloridos pela taxa de abstenção; os demais ficam em cinza.
+O dashboard apresenta cartões explicativos, mapa de calor, dispersão com escalas visíveis, tabela ordenável e grupos por faixa predominante. O mapa usa `data/geo/geojs-25-mun.json`, que contém polígonos para os 223 municípios. Todos são coloridos pela taxa de abstenção.

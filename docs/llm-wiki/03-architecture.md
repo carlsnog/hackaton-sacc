@@ -23,6 +23,6 @@
 
 ## Fluxo
 
-`CSV local -> validação -> fatos -> dimensão territorial local -> mart parcial -> SQLite -> API -> dashboard/assistant`.
+`API SIDRA oficial -> CSV local -> validação -> fatos -> dimensão territorial local -> mart completo -> SQLite -> API -> dashboard/assistant`.
 
 Artefatos reconstruíveis ficam em `data/curated`, `data/reports` e `data/rag`, ignorados pelo Git.

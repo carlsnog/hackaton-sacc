@@ -11,7 +11,7 @@ function svgText(x, y, text, anchor = "middle") {
 function renderScatter(items) {
   const svg = document.querySelector("#scatter");
   const valid = items.filter(item => item.renda_pc_mediana != null && item.taxa_abstencao_pct != null);
-  const minX = 550;
+  const minX = Math.floor(Math.min(...valid.map(item => item.renda_pc_mediana)) / 100) * 100;
   const maxX = Math.ceil(Math.max(...valid.map(item => item.renda_pc_mediana)) / 200) * 200;
   const maxY = Math.ceil(Math.max(...valid.map(item => item.taxa_abstencao_pct)) / 5) * 5;
   const left = 68, right = 690, top = 24, bottom = 315;
@@ -103,17 +103,17 @@ function renderRanking() {
 async function load() {
   const [summary, ranking, groups] = await Promise.all([
     fetch("/api/v1/resumo").then(response => response.json()),
-    fetch("/api/v1/municipios?page_size=100&sort=taxa_abstencao_pct&order=desc").then(response => response.json()),
+    fetch("/api/v1/municipios?page_size=300&sort=taxa_abstencao_pct&order=desc").then(response => response.json()),
     fetch("/api/v1/grupos-renda").then(response => response.json())
   ]);
   municipalities = ranking.items;
   document.querySelector("#notice").textContent =
-    `Leitura inicial com ${summary.municipios_validos} municípios que possuem dados eleitorais e socioeconômicos compatíveis. Os resultados representam o recorte disponível, não todos os municípios paraibanos.`;
+    `Análise territorial com ${summary.municipios_validos} municípios: ${fmt.format(summary.abrangencia_territorial_pct)}% das cidades paraibanas possuem dados eleitorais e socioeconômicos compatíveis.`;
   document.querySelector("#cards").innerHTML = [
     ["Municípios analisados", summary.municipios_validos, "Cidades com dados compatíveis para comparar ausência eleitoral e renda."],
     ["Eleitores ausentes", `${fmt.format(summary.taxa_abstencao_pct)}%`, "Percentual de pessoas aptas que não compareceram às urnas no recorte analisado."],
-    ["Eleitores aptos", integer.format(summary.total_aptos), `${fmt.format(summary.abrangencia_eleitores_paraiba_pct)}% dos ${integer.format(summary.eleitores_aptos_paraiba)} eleitores aptos da Paraíba estão representados nos municípios analisados.`],
-    ["Ausências registradas", integer.format(summary.total_abstencoes), "Quantidade de eleitores que não compareceram às urnas."]
+    ["Eleitores aptos na Paraíba", integer.format(summary.eleitores_aptos_paraiba), `Os ${summary.municipios_validos} municípios analisados abrangem ${fmt.format(summary.abrangencia_eleitores_paraiba_pct)}% dos eleitores aptos do estado.`],
+    ["Cobertura territorial", `${fmt.format(summary.abrangencia_territorial_pct)}%`, `${summary.municipios_validos} de ${summary.municipios_paraiba} municípios possuem dados compatíveis para a análise.`]
   ].map(([label, value, description]) => `<article class="card"><span>${label}</span><strong>${value}</strong><small>${description}</small></article>`).join("");
   document.querySelector("#income-groups").innerHTML = groups.map(item =>
     `<tr><td>${item.grupo}</td><td>${item.municipios}</td><td>${fmt.format(item.taxa_abstencao_media)}%</td><td>${fmt.format(item.taxa_abstencao_mediana)}%</td><td>${fmt.format(item.taxa_abstencao_desvio_padrao)}</td></tr>`

@@ -122,6 +122,8 @@ class AnalyticsRepository:
             ys = [row["taxa_abstencao_pct"] for row in rows if row["renda_pc_mediana"] is not None]
             aptos, abstencoes = sum(row["total_aptos"] for row in rows), sum(row["total_abstencoes"] for row in rows)
             aptos_paraiba = self.config["analysis_context"]["eleitores_aptos_paraiba"]
+            pb_municipalities = 223
+            territorial_coverage = 100 * len(rows) / pb_municipalities
             return {
                 "snapshot_id": rows[0]["snapshot_id"],
                 "ano_eleicao": rows[0]["ano_eleicao"],
@@ -129,10 +131,13 @@ class AnalyticsRepository:
                 "ano_referencia_renda": rows[0]["ano_referencia_renda"],
                 "ano_referencia_faixas": rows[0]["ano_referencia_faixas"],
                 "municipios_validos": len(rows),
-                "cobertura": "parcial: somente municipios com renda na fonte local",
+                "cobertura": "completa: todos os municipios PB possuem renda na fonte local" if len(rows) == pb_municipalities else "parcial: somente municipios com renda na fonte local",
                 "total_aptos": aptos,
                 "eleitores_aptos_paraiba": aptos_paraiba,
-                "abrangencia_eleitores_paraiba_pct": 100 * aptos / aptos_paraiba if aptos_paraiba else None,
+                "municipios_paraiba": pb_municipalities,
+                "abrangencia_territorial_pct": territorial_coverage,
+                "abrangencia_eleitores_paraiba_pct": territorial_coverage,
+                "nota_total_aptos": "total_aptos preserva a soma agregada do arquivo eleitoral local para calculo da taxa; nao representa eleitores unicos.",
                 "total_abstencoes": abstencoes,
                 "taxa_abstencao_pct": 100 * abstencoes / aptos if aptos else None,
                 "renda_pc_mediana_dos_municipios": statistics.median(xs) if xs else None,
