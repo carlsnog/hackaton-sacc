@@ -26,3 +26,4 @@ class VercelDeploymentTest(unittest.TestCase):
         repository = AnalyticsRepository(config)
         self.assertEqual(repository.db_path, self.root / "data" / "deploy" / "vozes_ausentes_pb.sqlite3")
         self.assertEqual(repository.summary({})["municipios_validos"], 223)
+        self.assertGreater(repository.municipality("2507507", {})["pib_mil_reais"], 0)

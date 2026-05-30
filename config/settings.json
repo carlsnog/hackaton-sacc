@@ -1,7 +1,7 @@
 {
-  "pipeline_version": "local-mvp-v3",
+  "pipeline_version": "local-mvp-v4",
   "database_path": "data/curated/vozes_ausentes_pb.sqlite3",
-  "electoral_source": "data/abstencao_nulos_brancos_2022_pb.csv",
+  "electoral_source": "data/dados_socioeconomicos_e_eleitorais.csv",
   "socioeconomic_source": "data/csv_SIDRA_indicadores_socio_economicos/indicadores_socioeconomicos_paraiba.csv",
   "report_directory": "data/reports",
   "rag_directory": "data/rag",

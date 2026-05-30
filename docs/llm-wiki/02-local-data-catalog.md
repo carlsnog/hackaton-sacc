@@ -2,7 +2,9 @@
 
 ## Eleitoral
 
-Arquivo: `data/abstencao_nulos_brancos_2022_pb.csv`.
+Arquivo: `data/dados_socioeconomicos_e_eleitorais.csv`.
+
+O arquivo combinado preserva os agregados eleitorais locais e acrescenta código IBGE, `pib_mil_reais`, totais por sexo e categorias de escolaridade. A origem deve ser comunicada separadamente: TSE para eleição de 2022 e IBGE para indicadores municipais. O arquivo local não explicita o ano de referência do PIB.
 
 Grão real: uma linha por município, já agregado. Não existem eleição, turno, zona ou seção no arquivo. O pipeline atribui `ano_eleicao=2022`, `turno=1` e `cod_eleicao=LOCAL-2022`, deixando explícita a adaptação.
 

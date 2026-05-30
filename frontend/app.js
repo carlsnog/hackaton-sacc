@@ -28,9 +28,9 @@ function renderScatter(items) {
 
 function renderElectoralScatter(items) {
   const svg = document.querySelector("#electoral-scatter");
-  const valid = items.filter(item => item.total_aptos > 0 && item.taxa_abstencao_pct != null);
-  const minX = 10 ** Math.floor(Math.log10(Math.min(...valid.map(item => item.total_aptos))));
-  const maxX = 10 ** Math.ceil(Math.log10(Math.max(...valid.map(item => item.total_aptos))));
+  const valid = items.filter(item => item.pib_mil_reais > 0 && item.taxa_abstencao_pct != null);
+  const minX = 10 ** Math.floor(Math.log10(Math.min(...valid.map(item => item.pib_mil_reais))));
+  const maxX = 10 ** Math.ceil(Math.log10(Math.max(...valid.map(item => item.pib_mil_reais))));
   const maxY = Math.ceil(Math.max(...valid.map(item => item.taxa_abstencao_pct)) / 5) * 5;
   const left = 76, right = 690, top = 24, bottom = 315;
   const x = value => left + (Math.log10(value) - Math.log10(minX)) / (Math.log10(maxX) - Math.log10(minX)) * (right - left);
@@ -40,8 +40,8 @@ function renderElectoralScatter(items) {
   const gridX = xTicks.map(value => `<line class="grid" x1="${x(value)}" y1="${top}" x2="${x(value)}" y2="${bottom}"/>${svgText(x(value), 334, integer.format(value))}`).join("");
   const gridY = yTicks.map(value => `<line class="grid" x1="${left}" y1="${y(value)}" x2="${right}" y2="${y(value)}"/>${svgText(66, y(value) + 4, `${value}%`, "end")}`).join("");
   svg.innerHTML = `${gridX}${gridY}<line class="axis" x1="${left}" y1="${bottom}" x2="${right}" y2="${bottom}"/><line class="axis" x1="${left}" y1="${top}" x2="${left}" y2="${bottom}"/>
-    ${svgText(380, 355, "Aptos registrados no recorte (escala log)")}${svgText(6, 16, "Eleitores ausentes (%)", "start")}` +
-    valid.map(item => `<circle cx="${x(item.total_aptos)}" cy="${y(item.taxa_abstencao_pct)}" r="7"><title>${item.municipio}: ${integer.format(item.total_aptos)} aptos registrados | ${fmt.format(item.taxa_abstencao_pct)}% ausentes</title></circle>`).join("");
+    ${svgText(380, 355, "PIB municipal em R$ mil (escala log)")}${svgText(6, 16, "Eleitores ausentes (%)", "start")}` +
+    valid.map(item => `<circle cx="${x(item.pib_mil_reais)}" cy="${y(item.taxa_abstencao_pct)}" r="7"><title>${item.municipio}: PIB de R$ ${integer.format(item.pib_mil_reais)} mil | ${fmt.format(item.taxa_abstencao_pct)}% ausentes</title></circle>`).join("");
 }
 
 function featureCode(feature) {
@@ -110,7 +110,7 @@ function renderRanking() {
     return direction * (a[currentSort.field] - b[currentSort.field]);
   });
   document.querySelector("#ranking").innerHTML = sorted.map(item =>
-    `<tr><td>${item.municipio}</td><td>${integer.format(item.total_aptos)}</td><td>${fmt.format(item.taxa_abstencao_pct)}%</td><td>${money.format(item.renda_pc_mediana)}</td><td>${fmt.format(item.score_vulnerabilidade)}</td></tr>`
+    `<tr><td>${item.municipio}</td><td>${integer.format(item.total_aptos)}</td><td>${fmt.format(item.taxa_abstencao_pct)}%</td><td>R$ ${integer.format(item.pib_mil_reais)} mil</td><td>${integer.format(item.sexo_feminino)}</td><td>${integer.format(item.sexo_masculino)}</td><td>${item.escolaridade_predominante}</td><td>${money.format(item.renda_pc_mediana)}</td><td>${fmt.format(item.score_vulnerabilidade)}</td></tr>`
   ).join("");
   document.querySelectorAll(".sort").forEach(button => {
     const selected = button.dataset.sort === currentSort.field;
