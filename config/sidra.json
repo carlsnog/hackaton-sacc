@@ -1,0 +1,26 @@
+{
+  "base_url": "https://servicodados.ibge.gov.br/api/v3/agregados",
+  "timeout_seconds": 60,
+  "retries": 3,
+  "raw_directory": "data/raw/ibge",
+  "output_directory": "data/csv_SIDRA_indicadores_socio_economicos",
+  "income": {
+    "table": "10295",
+    "period": "2022",
+    "variables": {
+      "13431": "Renda média domiciliar per capita",
+      "13534": "Renda mediana domiciliar per capita"
+    },
+    "classifications": "2[6794]|86[95251]|58[95253]"
+  },
+  "income_ranges": {
+    "table": "10296",
+    "period": "2022",
+    "variables": {
+      "13604": "Distribuição por faixas de renda",
+      "1013604": "Percentual por faixas de renda"
+    },
+    "classifications": "2[6794]|86[95251]|386[9680,9681,9682,9683,9684,9685,9686,9687,9688,9689,9690,9692]",
+    "category_dimension": "386"
+  }
+}

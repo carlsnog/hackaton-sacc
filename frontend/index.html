@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vozes Ausentes PB</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header>
+    <p class="eyebrow">Participação eleitoral na Paraíba</p>
+    <h1>Vozes Ausentes PB</h1>
+    <p>Explore a abstenção eleitoral nos municípios paraibanos e compare os indicadores com o contexto socioeconômico disponível.</p>
+    <p class="source-note">Fontes locais: TSE para os dados eleitorais de 2022 e IBGE para os indicadores municipais. Os indicadores censitários de renda usam referência de 2022.</p>
+  </header>
+  <main>
+    <section id="notice" class="notice"></section>
+    <section class="cards" id="cards"></section>
+    <section class="panel">
+      <div>
+        <p class="eyebrow">Visão territorial</p>
+        <h2>Mapa de calor da abstenção</h2>
+        <p>Quanto mais intensa a cor, maior foi a porcentagem de eleitores ausentes. Municípios em cinza ainda não possuem dados socioeconômicos cruzados neste recorte.</p>
+      </div>
+      <div id="map-container" class="map-container">
+        <svg id="heat-map" viewBox="0 0 720 460" role="img" aria-label="Mapa de calor municipal da taxa de abstenção na Paraíba"></svg>
+        <p id="map-fallback" class="empty-state"></p>
+      </div>
+      <div id="map-legend" class="heat-legend" hidden>
+        <span>Menor abstenção</span><i></i><span>Maior abstenção</span>
+      </div>
+    </section>
+    <section class="panel">
+      <div>
+        <p class="eyebrow">Dispersão municipal</p>
+        <h2>Renda municipal e abstenção</h2>
+        <p>Cada ponto representa um município. O gráfico ajuda a observar como renda e ausência eleitoral aparecem juntas no recorte disponível.</p>
+      </div>
+      <svg id="scatter" viewBox="0 0 720 360" role="img" aria-label="Gráfico de dispersão de renda mediana por taxa de abstenção"></svg>
+    </section>
+    <section class="panel">
+      <div>
+        <p class="eyebrow">Magnitude eleitoral</p>
+        <h2>PIB municipal e percentual de abstenção (escala log)</h2>
+        <p>Cada ponto representa um município. O eixo horizontal usa escala logarítmica para distribuir melhor cidades com diferentes magnitudes econômicas. O PIB municipal é exibido em milhares de reais.</p>
+      </div>
+      <svg id="electoral-scatter" viewBox="0 0 720 360" role="img" aria-label="Gráfico de dispersão de PIB municipal por percentual de abstenção"></svg>
+    </section>
+    <section class="panel">
+      <div class="toolbar">
+        <div>
+          <p class="eyebrow">Consulta por município</p>
+          <h2>Compare os municípios</h2>
+        </div>
+        <a href="/api/v1/export.csv">Exportar CSV</a>
+      </div>
+      <p>Selecione um cabeçalho para ordenar a tabela. A coluna de aptos registrados ajuda a dimensionar a magnitude eleitoral de cada município. Ela preserva o agregado disponível no arquivo local e não representa uma contagem de pessoas únicas.</p>
+      <div class="municipality-table-scroll" role="region" aria-label="Comparação de municípios" tabindex="0">
+        <table>
+          <thead><tr><th><button class="sort" data-sort="municipio">Município</button></th><th><button class="sort" data-sort="total_aptos">Aptos registrados no recorte</button></th><th><button class="sort" data-sort="taxa_abstencao_pct">Eleitores ausentes</button></th><th><button class="sort" data-sort="pib_mil_reais">PIB municipal (R$ mil)</button></th><th><button class="sort" data-sort="sexo_feminino">Sexo feminino</button></th><th><button class="sort" data-sort="sexo_masculino">Sexo masculino</button></th><th><button class="sort" data-sort="escolaridade_predominante">Escolaridade predominante</button></th><th><button class="sort" data-sort="renda_pc_mediana">Renda mediana por pessoa</button></th><th><button class="sort" data-sort="score_vulnerabilidade">Índice de atenção</button></th></tr></thead>
+          <tbody id="ranking"></tbody>
+        </table>
+      </div>
+    </section>
+    <section class="panel">
+      <p class="eyebrow">Pergunte aos dados</p>
+      <h2>Assistente de consulta</h2>
+      <form id="assistant-form">
+        <input id="question" placeholder="Ex.: top 5 por score ou fale sobre João Pessoa" required>
+        <button>Consultar</button>
+      </form>
+      <pre id="answer">Consulte um município, peça uma lista dos maiores índices ou pergunte sobre os dados disponíveis.</pre>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>

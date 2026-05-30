@@ -1,0 +1,26 @@
+{
+  "provider": "disabled",
+  "providers": {
+    "openai_compatible": {
+      "base_url_env": "LLM_BASE_URL",
+      "api_key_env": "LLM_API_KEY",
+      "model_env": "LLM_MODEL"
+    }
+  },
+  "prompts": {
+    "system": "ai/prompts/system.txt",
+    "methodology": "ai/prompts/methodology.txt",
+    "refusal": "ai/prompts/refusal.txt",
+    "help": "ai/prompts/help.txt"
+  },
+  "guardrails": {
+    "blocked_terms": [
+      "convencer eleitor",
+      "persuadir eleitor",
+      "segmentar pessoas",
+      "recomendar candidato",
+      "recomendar partido",
+      "inferir voto"
+    ]
+  }
+}

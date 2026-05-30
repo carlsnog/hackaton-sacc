@@ -1,0 +1,26 @@
+# Rastreabilidade dos requisitos
+
+## Implementado com dados locais
+
+| Área | Entrega |
+| --- | --- |
+| Pipeline | Leitura local configurável, hashes, manifesto, snapshot, dimensão territorial auditável, fatos e mart |
+| Qualidade | Schema obrigatório, universo PB, unicidade TSE, reconciliação eleitoral, limites percentuais, soma de faixas e alertas estruturados |
+| Indicadores | Taxa ponderada, percentis, score configurável, Pearson, Spearman, delta municipal e grupos por renda |
+| API | Resumo, lista paginada, detalhe, rankings, grupos, exportações CSV, status e healthcheck |
+| Dashboard | Cards explicativos, mapa de calor com fallback, scatter plot com escalas, tabela ordenável, grupos de renda e exportações |
+| IA | Tools determinísticas, RAG reconstruível, prompts externos, nomes de variáveis de credencial configuráveis e recusa neutra |
+| Operação | Containerfile, Compose, `.env.example`, Makefile Podman e testes containerizados |
+
+## Degradação controlada
+
+| Requisito | Motivo | Comportamento atual |
+| --- | --- | --- |
+| Crosswalk municipal | Código IBGE incluído no arquivo combinado local | Associação direta dos 223 municípios pelo código IBGE |
+| Auditoria por seção | Eleitoral local já está agregado por município | Pipeline valida unicidade municipal e documenta indisponibilidade de seção |
+| LLM externo e índice vetorial | Nenhum provedor ou banco vetorial foi fornecido | Assistente determinístico e documentos RAG JSON reconstruíveis |
+| PostgreSQL | Ambiente local inicial usa biblioteca padrão | SQLite isolado por repository para substituição futura |
+
+## Não preencher por estimativa
+
+Atualizações socioeconômicas podem usar somente a API oficial SIDRA configurada. Não preencher lacunas por estimativa ou fonte não auditável. Quando novos arquivos forem adicionados em `data/`, preservar os schemas canônicos e remover cada degradação com testes específicos.
