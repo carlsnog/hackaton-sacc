@@ -221,3 +221,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Data and local cache files
+*.zip
+*.csv
+.antigravitycli/
+
