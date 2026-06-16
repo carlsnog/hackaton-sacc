@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 import re
 import statistics
 import unicodedata
@@ -107,3 +108,17 @@ def spearman(xs: list[float], ys: list[float]) -> float | None:
         ]
 
     return pearson(ranks(xs), ranks(ys))
+
+
+def load_env() -> None:
+    if os.environ.get("TESTING") == "true":
+        return
+    env_path = project_root() / ".env"
+    if env_path.is_file():
+        for line in env_path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            if "=" in line:
+                key, val = line.split("=", 1)
+                os.environ[key.strip()] = val.strip()

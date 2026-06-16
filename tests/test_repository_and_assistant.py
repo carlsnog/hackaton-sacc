@@ -8,6 +8,10 @@ from pipeline.run_pipeline import run
 class RepositoryAndAssistantTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        import os
+        os.environ["TESTING"] = "true"
+        for key in ("LLM_API_KEY", "GEMINI_API_KEY", "OPENAI_API_KEY"):
+            os.environ.pop(key, None)
         run()
         cls.repository = AnalyticsRepository()
         cls.assistant = Assistant(cls.repository)

@@ -10,7 +10,7 @@ from urllib.parse import parse_qs, urlparse
 
 from ai.assistant import Assistant
 from app.repositories.analytics import AnalyticsRepository
-from pipeline.core import load_json, project_root
+from pipeline.core import load_env, load_json, project_root
 
 
 repository = AnalyticsRepository()
@@ -74,6 +74,10 @@ class Handler(BaseHTTPRequestHandler):
             return self.send_json(assistant.answer(question))
         except (ValueError, json.JSONDecodeError) as error:
             return self.send_json({"error": str(error)}, 422)
+        except Exception as error:
+            import traceback
+            traceback.print_exc()
+            return self.send_json({"error": str(error)}, 500)
 
     def send_export(self, params):
         items = repository.export_municipalities(params)
@@ -133,6 +137,7 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def run():
+    load_env()
     config = load_json("config/settings.json")["api"]
     server = ThreadingHTTPServer((config["host"], config["port"]), Handler)
     print(f"Vozes Ausentes PB em http://{config['host']}:{config['port']}")

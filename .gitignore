@@ -226,4 +226,5 @@ __marimo__/
 *.zip
 *.csv
 .antigravitycli/
-
+data/raw/ibge/*/
+!data/raw/ibge/20260530T170931Z/
